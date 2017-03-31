@@ -14,6 +14,11 @@ This project can end up with,
 * Staying as a learning-level project.
 * Upgrading to a multi-adaptered source to API  generator.
 
+## Version
+### 0.0.1-alpha
+Create a basic running scenario with server, conf etc.
+
+
 ## Installation
  1. Download and install **Rust** from [here](https://www.rust-lang.org/en-US/downloads.html)
  2. Download and install **Cargo** from [here](http://doc.crates.io/)
