@@ -4,11 +4,23 @@ version = "0.0.1-alpha"
 authors = ["serayuzgur <serayuzgur@gmail.com>"]
 
 [dependencies]
+# Serde for JSON
 serde="*"
 serde_derive="*"
 serde_json="*"
-bytes = "0.4"
-futures = "0.1"
-tokio-io = "0.1"
-tokio-proto = "0.1"
-tokio-service = "0.1"
+
+# Tokio for Server
+bytes = "*"
+futures = "*"
+tokio-io = "*"
+tokio-proto = "*"
+tokio-service = "*"
+tokio-minihttp = { git = "https://github.com/tokio-rs/tokio-minihttp" }
+
+# r2d2 for Mysql connection.
+r2d2 = "*"
+r2d2_mysql="*"
+
+# misc support for thread pools, random numbers, and json
+futures-cpupool = "*"
+rand = "*"
