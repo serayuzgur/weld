@@ -18,6 +18,11 @@ This project can end up with,
 ### 0.0.1-alpha
 Create a basic running scenario with server, conf etc.
 
+## Techs
+
+* **Serde** for json.
+* **Tokio** for server.
+
 
 ## Installation
  1. Download and install **Rust** from [here](https://www.rust-lang.org/en-US/downloads.html)
