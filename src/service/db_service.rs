@@ -1,5 +1,4 @@
 extern crate serde_json;
-extern crate rand;
 extern crate tokio_minihttp;
 
 extern crate futures;
@@ -10,7 +9,6 @@ extern crate r2d2_mysql;
 use std::io;
 use futures::{BoxFuture, Future};
 use futures_cpupool::CpuPool;
-use rand::Rng;
 use r2d2_mysql::MysqlConnectionManager;
 use tokio_minihttp::{Request, Response};
 use tokio_service::Service;
@@ -28,7 +26,6 @@ impl Service for DbService {
 
     fn call(&self, req: Request) -> Self::Future {
 
-        let random_id = rand::thread_rng().gen_range(0, 10_000);
         let db = self.db_pool.clone();
         let msg = self.thread_pool.spawn_fn(move || {
             let mut conn = db.get().unwrap();
