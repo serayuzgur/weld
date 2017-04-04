@@ -24,3 +24,9 @@ r2d2_mysql="*"
 # misc support for thread pools, random numbers, and json
 futures-cpupool = "*"
 rand = "*"
+
+# Logger
+slog= "*"
+slog-term="*"
+
+time="*"

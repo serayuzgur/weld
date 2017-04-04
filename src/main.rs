@@ -24,6 +24,12 @@ extern crate r2d2_mysql;
 extern crate serde_derive; // we have to define it here because macros must be at root 
 extern crate serde_json; 
 
+#[macro_use]
+extern crate slog;
+extern crate slog_term;
+
+
+extern crate time;
 
 mod codec;
 mod proto;
@@ -38,19 +44,23 @@ use r2d2_mysql::CreateManager;
 use r2d2_mysql::MysqlConnectionManager;
 
 use futures_cpupool::CpuPool;
-
-
-
 use configuration::Configuration;
+use slog::DrainExt;
 
 fn main() {
 
+    //Logger
+    //TODO: find a way to globally define root_logger. 
+    let root_logger: slog::Logger = slog::Logger::root(slog_term::streamer().build().fuse(),o!());
+
+    info!(root_logger, "Application started";"started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
+
     // Read configuration from "weld.json"
     let path = "weld.json";   
-    let configuration: Configuration = Configuration::new(&path.to_string());
+    let configuration: Configuration = Configuration::new(&path.to_string(),&root_logger);
     let thread_pool = CpuPool::new_num_cpus();
 
-    let server = Server::new(&configuration,&thread_pool);
+    let server = Server::new(&configuration,&thread_pool,&root_logger);
 
 
 //     let db_url = "mysql://root@localhost:3306/weld";
