@@ -22,6 +22,7 @@ Create a basic running scenario with server, conf etc.
 
 * **Serde** for json.
 * **Tokio** for server.
+* **slog** for logging.
 
 
 ## Installation
