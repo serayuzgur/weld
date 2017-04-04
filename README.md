@@ -12,7 +12,7 @@ Json file will be our first source adapter.
 This project can end up with,
 
 * Staying as a learning-level project.
-* Upgrading to a multi-adaptered source to API  generator.
+* Upgrading to a multi-adaptered source for API  generator.
 
 ## Version
 ### 0.0.1-alpha

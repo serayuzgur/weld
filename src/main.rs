@@ -28,6 +28,9 @@ extern crate serde_json;
 extern crate slog;
 extern crate slog_term;
 
+#[macro_use]
+extern crate lazy_static;
+
 
 extern crate time;
 
@@ -37,30 +40,33 @@ mod service;
 mod server;
 mod configuration;
 
-use service::db_service::DbService;
 use server::Server;
-use tokio_proto::TcpServer;
-use r2d2_mysql::CreateManager;
-use r2d2_mysql::MysqlConnectionManager;
 
 use futures_cpupool::CpuPool;
 use configuration::Configuration;
-use slog::DrainExt;
+
+pub mod weld {
+    //TODO: take this to a seperate file later.
+    use slog;
+    use slog_term;
+    use slog::DrainExt;
+    lazy_static! {
+        pub static ref ROOT_LOGGER: slog::Logger = slog::Logger::root(slog_term::streamer().build().fuse(),o!());
+    }
+}
 
 fn main() {
 
     //Logger
-    //TODO: find a way to globally define root_logger. 
-    let root_logger: slog::Logger = slog::Logger::root(slog_term::streamer().build().fuse(),o!());
-
-    info!(root_logger, "Application started";"started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
+    info!(weld::ROOT_LOGGER, "Application started";"started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
 
     // Read configuration from "weld.json"
+    // take it from program argumants
     let path = "weld.json";   
-    let configuration: Configuration = Configuration::new(&path.to_string(),&root_logger);
+    let configuration: Configuration = Configuration::new(&path.to_string());
     let thread_pool = CpuPool::new_num_cpus();
 
-    let server = Server::new(&configuration,&thread_pool,&root_logger);
+    let server = Server::new(&configuration,&thread_pool);
 
 
 //     let db_url = "mysql://root@localhost:3306/weld";

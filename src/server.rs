@@ -6,6 +6,7 @@ use futures;
 use futures_cpupool;
 use std::marker::Send;
 use slog;
+use weld;
 
 pub struct Server<'a> {
     configuration: &'a Configuration,
@@ -15,11 +16,11 @@ pub struct Server<'a> {
 
 
 impl<'a> Server<'a> {
-    pub fn new(config: &'a Configuration, thread_pool: &'a futures_cpupool::CpuPool, logger: &slog::Logger) -> Server<'a> {
+    pub fn new(config: &'a Configuration, thread_pool: &'a futures_cpupool::CpuPool) -> Server<'a> {
         Server {
             configuration: config,
             thread_pool: thread_pool,
-            logger: logger.new(o!()),
+            logger: weld::ROOT_LOGGER.new(o!()),
         }
     }
     pub fn start(&self) {
@@ -37,7 +38,7 @@ impl<'a> Server<'a> {
         let endpoint = format!("{}:{}", &listener.host, &listener.port).parse().unwrap();
 
 
-        println!("Server Started!");
+        info!(self.logger,"Server Started!");
         TcpServer::new(tokio_minihttp::Http, endpoint).serve(move || {
                                                                  Ok(rest_service::RestService {})
                                                              });

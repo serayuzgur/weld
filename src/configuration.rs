@@ -2,7 +2,7 @@ extern crate serde_json;
 
 use std::fs::File;
 use std::io::prelude::*;
-use slog::Logger;
+use weld;
 
 #[derive(Serialize, Deserialize)]
 #[derive(Debug)]
@@ -11,16 +11,16 @@ pub struct Configuration {
 }
 
 impl Configuration {
-    pub fn new(path: &String, root_logger: &Logger) -> Configuration {
-        info!(&root_logger, "Reading configuration : {:?}", &path);
+    pub fn new(path: &String) -> Configuration {
+        info!(weld::ROOT_LOGGER, "Reading configuration : {:?}", &path);
         let mut file = File::open(path).unwrap();
         let mut contents = String::new();
 
         file.read_to_string(&mut contents);
 
         let config: Configuration = serde_json::from_str(&contents).unwrap();
-        info!(root_logger, "Configutation Loaded");
-        debug!(root_logger, "{:?}", &config);
+        info!(weld::ROOT_LOGGER, "Configutation Loaded");
+        debug!(weld::ROOT_LOGGER, "{:?}", &config);
 
         return config;
     }

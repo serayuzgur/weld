@@ -30,3 +30,4 @@ slog= "*"
 slog-term="*"
 
 time="*"
+lazy_static="*"
