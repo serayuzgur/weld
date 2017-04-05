@@ -7,5 +7,8 @@
                 "port": 8080
             }
         ]
+    },
+    "database": {
+        "path": "db.json"
     }
 }

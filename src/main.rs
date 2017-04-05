@@ -39,12 +39,16 @@ mod proto;
 mod service;
 mod server;
 mod configuration;
+mod database;
 
-use server::Server;
 
 use futures_cpupool::CpuPool;
+use server::Server;
 use configuration::Configuration;
+use database::Database;
 
+/// Holds the shared variables of the application. 
+//TODO: Is is the right way?
 pub mod weld {
     //TODO: take this to a seperate file later.
     use slog;
@@ -61,24 +65,20 @@ fn main() {
     info!(weld::ROOT_LOGGER, "Application started";"started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
 
     // Read configuration from "weld.json"
-    // take it from program argumants
+    //TODO: take it from program argumants
     let path = "weld.json";   
     let configuration: Configuration = Configuration::new(&path.to_string());
     let thread_pool = CpuPool::new_num_cpus();
 
-    let server = Server::new(&configuration,&thread_pool);
+    let server = Server::new(&configuration.server,&thread_pool);
 
+    let mut database = Database::new(&configuration.database);
 
-//     let db_url = "mysql://root@localhost:3306/weld";
-//     let db_config = r2d2::Config::default();
-//     let db_manager = MysqlConnectionManager::new(db_url).unwrap();
-//     let db_pool = r2d2::Pool::new(db_config, db_manager).unwrap();
+    database.open();
 
-//     // The builder requires a protocol and an address
-//     // We provide a way to *instantiate* the service for each new
-//     // connection; here, we just immediately return a new instance.
-//   
+    info!(weld::ROOT_LOGGER,"{:?}", database.tables());
+
 
     // Always call this at the end.
-    server.start();
+    // server.start();
 }

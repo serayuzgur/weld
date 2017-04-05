@@ -8,6 +8,7 @@ use weld;
 #[derive(Debug)]
 pub struct Configuration {
     pub server: Server,
+    pub database: Database,
 }
 
 impl Configuration {
@@ -46,5 +47,11 @@ pub struct Listener {
     pub ltype: ListenerType,
     pub host: String,
     pub port: i16,
+}
+
+#[derive(Serialize, Deserialize)]
+#[derive(Debug)]
+pub struct Database {
+    pub path: String,
 }
 

@@ -1,4 +1,4 @@
-use configuration::Configuration;
+use configuration;
 use service::rest_service;
 use tokio_proto::TcpServer;
 use tokio_minihttp;
@@ -9,14 +9,14 @@ use slog;
 use weld;
 
 pub struct Server<'a> {
-    configuration: &'a Configuration,
+    configuration: &'a configuration::Server,
     thread_pool: &'a futures_cpupool::CpuPool,
     logger: slog::Logger
 }
 
 
 impl<'a> Server<'a> {
-    pub fn new(config: &'a Configuration, thread_pool: &'a futures_cpupool::CpuPool) -> Server<'a> {
+    pub fn new(config: &'a configuration::Server, thread_pool: &'a futures_cpupool::CpuPool) -> Server<'a> {
         Server {
             configuration: config,
             thread_pool: thread_pool,
@@ -25,13 +25,11 @@ impl<'a> Server<'a> {
     }
     pub fn start(&self) {
         //TODO: Make it loop
-        let listener = self.configuration.server
+        let listener = self.configuration
             .listeners
             .last()
             .unwrap();
         
-        // info!(root_logger, "Application started";"started_at" => format!("{}", time::now().rfc3339()));
-
         info!(self.logger,"Listener {:?}", &listener);
 
 
