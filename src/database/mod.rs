@@ -65,7 +65,7 @@ impl<'a> Database<'a> {
             Some(idx) => {
                 match array.get(idx) {
                     Some(value) => {
-                        info!(&self.logger, "Read  \"id\": {:?} {:?}", &id, &value);
+                        info!(&self.logger, "Read  \"id\": {:?} {}", &id, &value);
                         return Some(value.clone());
                     }
                     None => {
@@ -90,7 +90,7 @@ impl<'a> Database<'a> {
         match Database::find_index(array, &id) {
             None => {
                 array.push(serde_json::to_value(&value).unwrap());
-                info!(&self.logger, "Inserted  {:?}", &value);
+                debug!(&self.logger, "Inserted  {:?}", &value);
             }
             Some(idx) => {
                 error!(&self.logger,
@@ -127,7 +127,8 @@ impl<'a> Database<'a> {
                 for key in value.keys() {
                     old_value.insert(key.to_string(), value.get(key).unwrap().clone());
                 }
-                info!(&self.logger, "Updated  {:?}", &value);
+                info!(&self.logger, "Updated  \"id\": {:?}", &id);
+                debug!(&self.logger, "Updated  {:?}", &value);
             }
         }
     }
@@ -147,14 +148,14 @@ impl<'a> Database<'a> {
             }
             Some(idx) => {
                 let value = array.remove(idx);
-                info!(&self.logger, "Deleted  \"id\": {:?} {:?}", &id, &value);
+                info!(&self.logger, "Deleted  \"id\": {:?} {}", &id, &value);
             }
         }
     }
 
     pub fn flush(&mut self) {
         let new_db = &serde_json::to_string(&self.data).unwrap();
-        info!(&self.logger, "New Array {:?}", &new_db);
+        debug!(&self.logger, "New Array {}", &new_db);
 
         let bytes = new_db.as_bytes();
         info!(&self.logger, "Flushing changes to the Database");
