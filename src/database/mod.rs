@@ -58,12 +58,51 @@ impl<'a> Database<'a> {
         let db: &mut Map<String, Value> = db_option.unwrap();
         let en_map = db.get_mut(key).unwrap();
         let array: &mut Vec<Value> = en_map.as_array_mut().unwrap();
-        array.push(serde_json::to_value(&value).unwrap());
-        info!(&self.logger, "Inserted  {:?}", &value);
+        let id = value.get("id")
+            .unwrap()
+            .as_i64()
+            .unwrap();
+        match Database::find_index(array, &id) {
+            None => {
+                array.push(serde_json::to_value(&value).unwrap());
+                info!(&self.logger, "Inserted  {:?}", &value);
+            }
+            Some(idx) => {
+                error!(&self.logger,
+                      "Failed Insert  {:?}. \"id\" duplicates record at index: {:?}",
+                      &value,
+                      idx);
+            }
+
+        }
     }
 
     /// Updates the record with the given id.
-    pub fn update(&self) {}
+    pub fn update(&mut self, key: &str, value: Map<String, Value>) {
+        let ref mut data = self.data;
+        let db_option = data.as_object_mut();
+        let db: &mut Map<String, Value> = db_option.unwrap();
+        let en_map = db.get_mut(key).unwrap();
+        let array: &mut Vec<Value> = en_map.as_array_mut().unwrap();
+        let id = value.get("id")
+            .unwrap()
+            .as_i64()
+            .unwrap();
+        match Database::find_index(array, &id) {
+            None => {
+                error!(&self.logger,
+                       "Failed update  {:?}. No record with the given \"id\"",
+                       &value);
+            }
+            Some(idx) => {
+                let old_value = array.get_mut(idx).unwrap().as_object_mut().unwrap();;
+                for key in value.keys(){
+                    old_value.insert(key.to_string(),value.get(key).unwrap().clone());
+                }
+                info!(&self.logger, "Updated  {:?}", &value);
+            }
+        }
+    }
 
     /// Deletes the record with the given id.
     pub fn delete(&self) {}
@@ -91,6 +130,23 @@ impl<'a> Database<'a> {
         let mut keys = vec![];
         keys.extend(map.keys());
         keys
+    }
+
+    fn find_index(vec: &mut Vec<Value>, target: &i64) -> Option<usize> {
+        let mut index = 0;
+        for value in vec.iter() {
+            let map = value.as_object().unwrap();
+
+            let id = map.get("id")
+                .unwrap()
+                .as_i64()
+                .unwrap();
+            if id.eq(target) {
+                return Some(index);
+            }
+            index += 1;
+        }
+        None
     }
 }
 

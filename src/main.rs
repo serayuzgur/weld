@@ -73,16 +73,26 @@ fn main() {
     let server = Server::new(&configuration.server,&thread_pool);
 
     let mut database = Database::new(&configuration.database);
+    
+    database.open();
+    info!(weld::ROOT_LOGGER,"{:?}", database.tables());
     let js = r#"{
             "id": 2,
             "title": "Obaaa",
             "author": "Seray"
     }"#;
-    database.open();
     database.insert("posts", serde_json::from_str(js).unwrap());
     database.flush();
 
-    info!(weld::ROOT_LOGGER,"{:?}", database.tables());
+    let js2 = r#"{
+            "id": 2,
+            "title": "Obaaa",
+            "author": "Seray Yeni"
+    }"#;
+
+    database.update("posts", serde_json::from_str(js2).unwrap());
+    database.flush();
+
 
 
     // Always call this at the end.
