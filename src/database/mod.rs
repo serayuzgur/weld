@@ -49,7 +49,32 @@ impl<'a> Database<'a> {
     pub fn close(&self) {}
 
     /// Reads the desired level (all , entity, filters...).
-    pub fn read(&self) {}
+    pub fn read(&mut self, key: &str, id: &i64) -> Option<Value> {
+        let ref mut data = self.data;
+        let db_option = data.as_object_mut();
+        let db: &mut Map<String, Value> = db_option.unwrap();
+        let en_map = db.get_mut(key).unwrap();
+        let array: &mut Vec<Value> = en_map.as_array_mut().unwrap();
+        match Database::find_index(array, &id) {
+            None => {
+                error!(&self.logger,
+                       "Failed Delete No record with the given \"id\": {:?}",
+                       &id);
+                return None;
+            }
+            Some(idx) => {
+                match array.get(idx) {
+                    Some(value) => {
+                        info!(&self.logger, "Read  \"id\": {:?} {:?}", &id, &value);
+                        return Some(value.clone());
+                    }
+                    None => {
+                        return None;
+                    }
+                }
+            }
+        }
+    }
 
     /// Inserts the record to the desired place.
     pub fn insert(&mut self, key: &str, value: Map<String, Value>) {
@@ -69,9 +94,9 @@ impl<'a> Database<'a> {
             }
             Some(idx) => {
                 error!(&self.logger,
-                      "Failed Insert  {:?}. \"id\" duplicates record at index: {:?}",
-                      &value,
-                      idx);
+                       "Failed Insert  {:?}. \"id\" duplicates record at index: {:?}",
+                       &value,
+                       idx);
             }
 
         }
@@ -95,9 +120,12 @@ impl<'a> Database<'a> {
                        &value);
             }
             Some(idx) => {
-                let old_value = array.get_mut(idx).unwrap().as_object_mut().unwrap();;
-                for key in value.keys(){
-                    old_value.insert(key.to_string(),value.get(key).unwrap().clone());
+                let old_value = array.get_mut(idx)
+                    .unwrap()
+                    .as_object_mut()
+                    .unwrap();
+                for key in value.keys() {
+                    old_value.insert(key.to_string(), value.get(key).unwrap().clone());
                 }
                 info!(&self.logger, "Updated  {:?}", &value);
             }
@@ -105,7 +133,24 @@ impl<'a> Database<'a> {
     }
 
     /// Deletes the record with the given id.
-    pub fn delete(&self) {}
+    pub fn delete(&mut self, key: &str, id: &i64) {
+        let ref mut data = self.data;
+        let db_option = data.as_object_mut();
+        let db: &mut Map<String, Value> = db_option.unwrap();
+        let en_map = db.get_mut(key).unwrap();
+        let array: &mut Vec<Value> = en_map.as_array_mut().unwrap();
+        match Database::find_index(array, &id) {
+            None => {
+                error!(&self.logger,
+                       "Failed Delete No record with the given \"id\": {:?}",
+                       &id);
+            }
+            Some(idx) => {
+                let value = array.remove(idx);
+                info!(&self.logger, "Deleted  \"id\": {:?} {:?}", &id, &value);
+            }
+        }
+    }
 
     pub fn flush(&mut self) {
         let new_db = &serde_json::to_string(&self.data).unwrap();

@@ -93,6 +93,11 @@ fn main() {
     database.update("posts", serde_json::from_str(js2).unwrap());
     database.flush();
 
+    database.read("posts",&2);
+
+    database.delete("posts",&2);
+    database.flush();
+
 
 
     // Always call this at the end.
