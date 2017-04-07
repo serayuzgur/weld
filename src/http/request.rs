@@ -53,10 +53,9 @@ impl Request {
 impl fmt::Debug for Request {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,
-               "<HTTP Request {} {} Body: {:?}>",
+               "<HTTP Request {} {} >",
                self.method(),
-               self.path(),
-               self.body())
+               self.path())
     }
 }
 

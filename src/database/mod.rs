@@ -127,7 +127,7 @@ impl Database {
 					}
 					None=>{}
 				}
-				
+
 				value.insert("id".to_string(),serde_json::to_value(id).unwrap());
 
 				match Database::find_index(array, &id) {
@@ -240,7 +240,7 @@ impl Database {
 
 	pub fn flush(&mut self) {
 		let new_db = &serde_json::to_string(&self.data).unwrap();
-		debug!(&self.logger, "Flush -  Starded Data: {}", &new_db);
+		debug!(&self.logger, "Flush -  Started");
 		let bytes = new_db.as_bytes();
 		let mut file = OpenOptions::new()
 			.read(true)
