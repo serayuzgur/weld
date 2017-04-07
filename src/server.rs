@@ -1,5 +1,5 @@
 use configuration;
-use service::rest_service;
+use rest_service;
 use tokio_proto::TcpServer;
 use tokio_minihttp;
 use futures;
@@ -7,6 +7,7 @@ use futures_cpupool;
 use std::marker::Send;
 use slog;
 use weld;
+use http;
 
 pub struct Server<'a> {
     configuration: &'a configuration::Server,
@@ -39,7 +40,7 @@ impl<'a> Server<'a> {
 
 
         info!(self.logger, "Server Started!");
-        TcpServer::new(tokio_minihttp::Http, endpoint).serve(move || {
+        TcpServer::new(http::Http, endpoint).serve(move || {
                                                                  Ok(rest_service::RestService {
                                                                      logger:weld::ROOT_LOGGER.new(o!()),
                                                                     paths: vec!["a".to_string(), "b".to_string()],

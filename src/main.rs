@@ -1,15 +1,11 @@
 //! # Weld
 //!
 
-#[doc(hidden)]
 extern crate bytes;
-#[doc(hidden)]
 extern crate tokio_io;
-#[doc(hidden)]
+extern crate tokio_core;
 extern crate tokio_proto;
-#[doc(hidden)]
 extern crate tokio_service;
-#[doc(hidden)]
 extern crate tokio_minihttp;
 
 extern crate rand;
@@ -17,7 +13,6 @@ extern crate rand;
 extern crate futures;
 extern crate futures_cpupool;
 
-#[doc(hidden)]
 #[macro_use]
 extern crate serde_derive; // we have to define it here because macros must be at root 
 extern crate serde_json; 
@@ -28,16 +23,17 @@ extern crate slog_term;
 
 #[macro_use]
 extern crate lazy_static;
-
-
 extern crate time;
+extern crate httparse;
+
 
 mod codec;
 mod proto;
-mod service;
+mod rest_service;
 mod server;
 mod configuration;
 mod database;
+mod http;
 
 
 use futures_cpupool::CpuPool;

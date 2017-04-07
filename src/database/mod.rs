@@ -109,7 +109,7 @@ impl Database {
 	}
 
 	/// Inserts the record to the desired place.
-	pub fn insert(&mut self, key: &str, value: Map<String, Value>) -> Option<Value> {
+	pub fn insert(&mut self, key: &str, value: &mut Map<String, Value>) -> Option<Value> {
 		let ref mut data = self.data;
 		let db_option = data.as_object_mut();
 		let db: &mut Map<String, Value> = db_option.expect("Database is invalid. You can't mock API with it. Terminating...");
@@ -119,14 +119,17 @@ impl Database {
 				let mut id = rand::random();
 				//If id comes with the record use it.
 				match value.get("id"){
-					Some(value)=>{
-						match value.as_i64(){
-							Some(parsed)=> {id = parsed;}
-							None=>{}
+					Some(id_value)=>{
+						match id_value.as_i64(){
+							Some(parsed)=> id = parsed,
+							None=> {}
 						}
 					}
 					None=>{}
 				}
+				
+				value.insert("id".to_string(),serde_json::to_value(id).unwrap());
+
 				match Database::find_index(array, &id) {
 					None => {
 						let as_value = serde_json::to_value(&value).unwrap();
@@ -151,7 +154,7 @@ impl Database {
 	}
 
 	/// Updates the record with the given id.
-	pub fn update(&mut self, key: &str, value: Map<String, Value>) {
+	pub fn update(&mut self, key: &str, value: Map<String, Value>) -> Option<Value> {
 		let ref mut data = self.data;
 		let db_option = data.as_object_mut();
 		let db: &mut Map<String, Value> = db_option.expect("Database is invalid. You can't mock API with it. Terminating...");
@@ -167,17 +170,22 @@ impl Database {
 										error!(&self.logger,
 											"Failed update  {:?}. No record with the given \"id\"",
 											&value);
+										return None;
 									}
 									Some(idx) => {
 										let old_value = array.get_mut(idx)
-											.unwrap()
-											.as_object_mut()
 											.unwrap();
-										for key in value.keys() {
-											old_value.insert(key.to_string(), value.get(key).unwrap().clone());
+										{
+											let old_map = 
+												old_value.as_object_mut()
+												.unwrap();
+											for key in value.keys() {
+												old_map.insert(key.to_string(), value.get(key).unwrap().clone());
+											}
 										}
 										info!(&self.logger, "Updated - Ok id: {:?}", &id);
 										debug!(&self.logger, "Updated - Value  {:?}", &value);
+										return Some(old_value.clone());
 									}
 								}
 							}
@@ -185,6 +193,7 @@ impl Database {
 								error!(&self.logger,
 									"Update - Error  {:?}. id column is not valid. Must be compatible with i64",
 									&value);
+								return None;
 							}
 						}
 					}
@@ -192,10 +201,12 @@ impl Database {
 					  error!(&self.logger,
 						"Update - Error  {:?}. id column is not available. Must have an i64 compatible id",
 						&value);  
+						return None;
 					}
 				}
 			}
-			None=>{}
+			None=>return None
+
 		}
 	}
 
