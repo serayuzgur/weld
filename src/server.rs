@@ -41,7 +41,8 @@ impl<'a> Server<'a> {
         info!(self.logger, "Server Started!");
         TcpServer::new(tokio_minihttp::Http, endpoint).serve(move || {
                                                                  Ok(rest_service::RestService {
-                                                                        paths: vec!["a".to_string(), "b".to_string()],
+                                                                     logger:weld::ROOT_LOGGER.new(o!()),
+                                                                    paths: vec!["a".to_string(), "b".to_string()],
                                                                     })
                                                              });
 

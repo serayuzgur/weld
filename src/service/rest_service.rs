@@ -9,9 +9,12 @@ use std::vec::Vec;
 use futures::{BoxFuture, Future};
 use tokio_minihttp::{Request, Response};
 use tokio_service::Service;
+use weld;
+use slog;
 
 pub struct RestService {
     pub paths: Vec<String>,
+    pub logger: slog::Logger,
 }
 
 impl Service for RestService {
@@ -21,25 +24,23 @@ impl Service for RestService {
     type Future = BoxFuture<Response, io::Error>;
 
     fn call(&self, req: Request) -> Self::Future {
-        let msg = User {
-            oid: 123,
-            name: "John".to_string(),
-            surname: "Doe".to_string(),
-        };
+        let path = req.path();
+        info!(self.logger, "{}", &path);
 
-
-        let json = serde_json::to_string(&msg).unwrap();
+        let mut db = weld::DATABASE.lock().unwrap();
+        info!(self.logger, "DB aquired");
         let mut response = Response::new();
         response.header("Content-Type", "application/json");
-        response.body(&json);
+
+        match db.read("posts", &1) {
+            Some(record) => {
+                let json = serde_json::to_string(&record).unwrap();
+                response.body(&json);
+            }
+            None => {}
+        }
+
         futures::future::ok(response).boxed()
     }
-}
-
-#[derive(Serialize, Deserialize)]
-struct User {
-    oid: i32,
-    name: String,
-    surname: String,
 }
 

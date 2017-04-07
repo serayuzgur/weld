@@ -19,21 +19,27 @@ use rand;
 /// Does all the operations in the memory and writes the final object to the file at the end.
 // TODO: Use serde better for indexed updates over file.
 #[derive(Debug)]
-pub struct Database<'a> {
+pub struct Database {
 	logger: Logger,
-	configuration: &'a configuration::Database,
+	configuration: configuration::Database,
 	data: serde_json::Value,
 }
 
-impl<'a> Database<'a> {
+impl Database {
 	/// Creates an instance of the Database.
-	pub fn new(configuration: &'a configuration::Database) -> Database {
+	pub fn new(configuration: &configuration::Database) -> Database {
 		let path: String = configuration.path.clone();
 		Database {
 			logger: ROOT_LOGGER.new(o!("database.path"=>path)),
-			configuration: &configuration,
+			configuration: configuration.clone(),
 			data: serde_json::Value::Null,
 		}
+	}
+	pub fn set_configuration(&mut self,configuration: &configuration::Database) {
+		let path: String = configuration.path.clone();
+		self.logger =  ROOT_LOGGER.new(o!("database.path"=>path));
+		self.configuration = configuration.clone();
+		self.data = serde_json::Value::Null;
 	}
 	/// Parses the file and loads in to the memory.
 	/// You have to call this before doing any set of operations.

@@ -54,11 +54,14 @@ pub mod weld {
     use slog_term;
     use slog::DrainExt;
     use configuration::Configuration;
+    use configuration;
+    use database::Database;
     use std::sync::Mutex;
 
     lazy_static! {
         pub static ref ROOT_LOGGER: slog::Logger = slog::Logger::root(slog_term::streamer().build().fuse(),o!());
         pub static ref CONFIGURATION : Mutex<Configuration> = Mutex::new(Configuration::new(&"".to_string()));
+        pub static ref DATABASE : Mutex<Database> = Mutex::new(Database::new(&configuration::Database{path:"".to_string()}));
     }
 }
 
@@ -68,7 +71,6 @@ fn main() {
     info!(weld::ROOT_LOGGER, "Application started";"started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
 
     let mut configuration =  weld::CONFIGURATION.lock().unwrap();
-    configuration.load(&"README.md".to_string());
     match args().nth(1) {
         Some(path) => configuration.load(&path.to_string()),
         None => {
@@ -80,34 +82,13 @@ fn main() {
 
     let server = Server::new(&configuration.server,&thread_pool);
 
-    let mut database = Database::new(&configuration.database);
-    
-    database.open();
-    info!(weld::ROOT_LOGGER,"{:?}", database.tables());
-    let js = r#"{
-            "id": 2,
-            "title": "Obaaa",
-            "author": "Seray"
-    }"#;
-    database.insert("posts", serde_json::from_str(js).unwrap());
-    database.flush();
-
-    let js2 = r#"{
-            "id": 2,
-            "title": "Obaaa",
-            "author": "Seray Yeni"
-    }"#;
-
-    database.update("posts", serde_json::from_str(js2).unwrap());
-    database.flush();
-
-    database.read("posts",&2);
-
-    database.delete("posts",&2);
-    database.flush();
-
-
-
+    load_db(&configuration);
     // Always call this at the end.
-    // server.start();
+    server.start();
+}
+
+fn load_db(configuration: &Configuration){
+    let mut database = weld::DATABASE.lock().unwrap();
+    database.set_configuration(&configuration.database);
+    database.open();
 }
