@@ -78,6 +78,9 @@ impl Database {
 		match db.get_mut(key){
 			Some(en_map) => {
 				let array: &mut Vec<Value> = en_map.as_array_mut().expect("Table is invalid. For now it can only be Array<Map>. Terminating...");
+				if id < &0{
+					return Some(serde_json::to_value(array.clone()).unwrap());
+				}
 				match Database::find_index(array, &id) {
 					None => {
 						error!(&self.logger, "Read - Error  id: {:?}", &id);

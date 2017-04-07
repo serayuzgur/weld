@@ -26,21 +26,61 @@ impl Service for RestService {
     fn call(&self, req: Request) -> Self::Future {
         let path = req.path();
         info!(self.logger, "{}", &path);
+        let parts = path.split("/").filter(|x| !x.is_empty()).collect::<Vec<_>>();
 
         let mut db = weld::DATABASE.lock().unwrap();
-        info!(self.logger, "DB aquired");
         let mut response = Response::new();
         response.header("Content-Type", "application/json");
 
-        match db.read("posts", &1) {
-            Some(record) => {
-                let json = serde_json::to_string(&record).unwrap();
+        match parts.len() {
+            0 => {
+                // Table list
+                let json = serde_json::to_string(&db.tables()).unwrap();
                 response.body(&json);
+                return futures::future::ok(response).boxed();
             }
-            None => {}
-        }
+            1 | 2 => {
+                // Record list or record
+                let table = parts.get(0).unwrap();
+                let mut id = -1;
+                match parts.get(1) {
+                    Some(val) => {
+                        if !val.is_empty() {
+                            match i64::from_str_radix(val, 10) {
+                                Ok(parsed) => id = parsed,
+                                Err(e) => {
+                                    error!(self.logger, "Non parsable id Error: {}", e);
+                                    response.status_code(412, "Non parsable id Error: {}");
+                                    response.body("Non parsable id Error: {}");
+                                    return futures::future::ok(response).boxed();
+                                }
+                            }
+                        }
+                    }
+                    None => {}
+                }
+                match db.read(table, &id) {
+                    Some(record) => {
+                        let json = serde_json::to_string(&record).unwrap();
+                        response.body(&json);
+                        return futures::future::ok(response).boxed();
+                    }
+                    None => {
+                        error!{self.logger,"Record not found"}
+                        response.status_code(404, "Record not found");
+                        response.body("Record not found");
+                        return futures::future::ok(response).boxed();
+                    }
+                }
+            }
 
-        futures::future::ok(response).boxed()
+            _ => {
+                error!{self.logger,"Nested structures are not implemented yet."}
+                response.status_code(500, "Nested structures are not implemented yet.");
+                response.body("Nested structures are not implemented yet.");
+                return futures::future::ok(response).boxed();
+            }
+        }
     }
 }
 
