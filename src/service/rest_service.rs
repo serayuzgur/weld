@@ -3,15 +3,16 @@ extern crate tokio_minihttp;
 
 extern crate futures;
 extern crate futures_cpupool;
-extern crate r2d2;
-extern crate r2d2_mysql;
 
 use std::io;
+use std::vec::Vec;
 use futures::{BoxFuture, Future};
 use tokio_minihttp::{Request, Response};
 use tokio_service::Service;
 
-pub struct RestService {}
+pub struct RestService {
+    pub paths: Vec<String>,
+}
 
 impl Service for RestService {
     type Request = Request;

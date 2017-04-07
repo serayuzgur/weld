@@ -40,25 +40,28 @@ impl<'a> Database<'a> {
 	/// All failed operations results with panic because there is no meaning to continue without a proper db.
 	pub fn open(&mut self) {
 		info!(self.logger,
-			  "Connecting database : {:?}",
+			  "Database - Connecting : {:?}",
 			  self.configuration.path);
 		let mut file =
-			File::open(&self.configuration.path).expect("Can't read provided db. Terminating...");
+			File::open(&self.configuration.path).expect("Database - Error Can't read. Terminating...");
 		let mut contents = String::new();
 		match file.read_to_string(&mut contents) {
 			Ok(usize) => {
 				if usize == 0 {
-					panic!("Database is empty. You can't mock API with it. Terminating...");
+					panic!("Database - Error It is empty. You can't mock API with it. Terminating...");
 				}
 			}
 			Err(e) => {
-				error!(self.logger, "Error reading db: {}", e);
-				panic!("Database is invalid. You can't mock API with it. Terminating...");
+				error!(self.logger, "Database - Error {}", e);
+				panic!("Database - Error You can't mock API with it. Terminating...");
 			}
 		}
 		let new_data: serde_json::Value = serde_json::from_str(&contents).expect("Invalid JSON format. Check provided db. Terminating...");
 		debug!(self.logger, "{}", &new_data);
 		self.data = new_data;
+		info!(self.logger,
+			  "Database - Ok : {:?}",
+			  self.configuration.path);
 	}
 
 	/// Reads the desired result with the given id.

@@ -17,10 +17,6 @@ tokio-proto = "*"
 tokio-service = "*"
 tokio-minihttp = { git = "https://github.com/tokio-rs/tokio-minihttp" }
 
-# r2d2 for Mysql connection.
-r2d2 = "*"
-r2d2_mysql="*"
-
 # misc support for thread pools, random numbers, and json
 futures-cpupool = "*"
 rand = "*"

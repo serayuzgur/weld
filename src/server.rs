@@ -11,12 +11,14 @@ use weld;
 pub struct Server<'a> {
     configuration: &'a configuration::Server,
     thread_pool: &'a futures_cpupool::CpuPool,
-    logger: slog::Logger
+    logger: slog::Logger,
 }
 
 
 impl<'a> Server<'a> {
-    pub fn new(config: &'a configuration::Server, thread_pool: &'a futures_cpupool::CpuPool) -> Server<'a> {
+    pub fn new(config: &'a configuration::Server,
+               thread_pool: &'a futures_cpupool::CpuPool)
+               -> Server<'a> {
         Server {
             configuration: config,
             thread_pool: thread_pool,
@@ -29,16 +31,18 @@ impl<'a> Server<'a> {
             .listeners
             .last()
             .unwrap();
-        
-        info!(self.logger,"Listener {:?}", &listener);
+
+        info!(self.logger, "Listener {:?}", &listener);
 
 
         let endpoint = format!("{}:{}", &listener.host, &listener.port).parse().unwrap();
 
 
-        info!(self.logger,"Server Started!");
+        info!(self.logger, "Server Started!");
         TcpServer::new(tokio_minihttp::Http, endpoint).serve(move || {
-                                                                 Ok(rest_service::RestService {})
+                                                                 Ok(rest_service::RestService {
+                                                                        paths: vec!["a".to_string(), "b".to_string()],
+                                                                    })
                                                              });
 
         // Finish loop;
