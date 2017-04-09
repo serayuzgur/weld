@@ -1,6 +1,6 @@
 [package]
 name = "weld"
-version = "0.0.1-alpha"
+version = "0.0.1-alpha.1"
 authors = ["serayuzgur <serayuzgur@gmail.com>"]
 
 [dependencies]
