@@ -26,9 +26,6 @@ extern crate lazy_static;
 extern crate time;
 extern crate httparse;
 
-
-mod codec;
-mod proto;
 mod rest_service;
 mod server;
 mod configuration;
@@ -39,7 +36,6 @@ mod http;
 use futures_cpupool::CpuPool;
 use server::Server;
 use configuration::Configuration;
-use database::Database;
 use std::env::args;
 
 /// Holds the shared variables of the application. 
@@ -62,7 +58,6 @@ pub mod weld {
 }
 
 fn main() {
-
     //Logger
     info!(weld::ROOT_LOGGER, "Application started";"started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
 

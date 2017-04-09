@@ -27,27 +27,17 @@ impl<'a> Server<'a> {
         }
     }
     pub fn start(&self) {
-        //TODO: Make it loop
-        let listener = self.configuration
-            .listeners
-            .last()
-            .unwrap();
-
-        info!(self.logger, "Listener {:?}", &listener);
-
-
-        let endpoint = format!("{}:{}", &listener.host, &listener.port).parse().unwrap();
-
-
-        info!(self.logger, "Server Started!");
+        info!(self.logger,
+              "Server - Configuration {:?}",
+              self.configuration);
+        let endpoint =
+            format!("{}:{}", self.configuration.host, self.configuration.port).parse().unwrap();
+        info!(self.logger, "Server - Started!");
         TcpServer::new(http::Http, endpoint).serve(move || {
-                                                                 Ok(rest_service::RestService {
-                                                                     logger:weld::ROOT_LOGGER.new(o!()),
-                                                                    paths: vec!["a".to_string(), "b".to_string()],
-                                                                    })
-                                                             });
-
-        // Finish loop;
+                                                       Ok(rest_service::RestService {
+                                                              logger: weld::ROOT_LOGGER.new(o!()),
+                                                          })
+                                                   });
 
     }
 }

@@ -6,33 +6,194 @@ This project is heavily inspired by [json-server](https://github.com/typicode/js
 
 
 ## Synopsis
-Our first aim is to sharpen our rust skills by generating a fake api from the given data source. 
-Json file will be our first source adapter.
-
-This project can end up with,
-
-* Staying as a learning-level project.
-* Upgrading to a multi-adaptered source for API  generator.
+Our first aim is to sharpen our rust skills by generating a fake api from the given data source (JSON). 
+It may have bugs, missing features but if you contribute they all will be fixed.
 
 ## Version
 ### 0.0.1-alpha
 Create a basic running scenario with server, conf etc.
+### 0.0.1-alpha.1
+All crud operations. 
 
 ## Techs
-
-* **Serde** for json.
-* **Tokio** for server.
-* **slog** for logging.
+* [**Serde**](https://github.com/serde-rs/serde) for json parsing.
+* [**Tokio**](https://github.com/tokio-rs/tokio) for serving.
+* [**slog**](https://github.com/slog-rs/slog) for logging.
 
 
 ## Installation
  1. Download and install **Rust** from [here](https://www.rust-lang.org/en-US/downloads.html)
  2. Download and install **Cargo** from [here](http://doc.crates.io/)
  3. Clone and run the project.
+
 ```bash 
 git clone https://github.com/serayuzgur/weld.git
 cd weld
 cargo run
+```
+
+## Usage
+
+### Running
+Executable can take configuration path otherwise it will use default `./weld.json`. If we take project folder as root, commands should look like one of these. If you you use `cargo build --release` version change `debug` with `release`.
+
+```bash 
+./target/debug/weld  
+./target/debug/weld weld.json
+./target/debug/weld <path_to_config>.json
+
+./target/release/weld  
+./target/release/weld weld.json
+./target/release/weld <path_to_config>.json
+```
+
+### Configuration
+Configuration file is a very simple json file which is responsible to hold server and database properties.
+
+```json
+{
+    "server": {
+        "host": "127.0.0.1",
+        "port": 8080
+    },
+    "database": {
+        "path": "db.json"
+    }
+}
+```
+
+### Database
+Database is a simple json file. Currently it supports the structure `Object -> Array<Object>`.
+
+```json
+{
+    "comments": [
+        {
+            "body": "some comment",
+            "id": 1,
+            "postId": 1
+        }
+    ],
+    "posts": [
+        {
+            "author": "serayuzgur",
+            "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. ",
+            "id": 1,
+            "title": "Rust Rocks!"
+        },
+        {
+            "author": "kamilbukum",
+            "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. ",
+            "id": 2,
+            "title": "TypeScript is Awesome"
+        }
+    ]
+}
+```
+
+Here the `comments` and `posts` are tables. They hold an array of the records. They can be empty arrays but they must exist as is.
+
+**NOTE :** `id`: Column is a must, all parsing uses it.
+
+### API 
+Api usage is pretty simple. For now it does not support filters one other query params. Here is the list of the calls you can make with examples.
+
+* Get List \<host\>:\<port\>/\<table\> GET
+* Get Record \<host\>:\<port\>/\<table\>/\<id\> GET
+* Insert Record \<host\>:\<port\>/\<table\> POST
+* Update Record \<host\>:\<port\>/\<table\>/\<id\> PUT
+* Delete Record \<host\>:\<port\>/\<table\>/\<id\> DELETE
+
+#### Get List
+``` 
+url: http://127.0.0.1:8080/posts 
+method: GET
+body: empty
+
+response: 
+[
+  {
+    "author": "serayuzgur",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. ",
+    "id": 1,
+    "title": "Rust Rocks!"
+  },
+  {
+    "author": "kamilbukum",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. ",
+    "id": 2,
+    "title": "TypeScript is Awesome"
+  }
+]
+```
+#### Get Record
+``` 
+url: http://127.0.0.1:8080/posts/1 
+method: GET
+body: empty
+
+response: 
+{
+  "author": "serayuzgur",
+  "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. ",
+  "id": 1,
+  "title": "Rust Rocks!"
+}
+```
+#### Insert Record
+``` 
+url: http://127.0.0.1:8080/posts
+method: POST
+body:
+{
+    "id": 3,
+    "author": "hasanmumin",
+    "title": "KendoUI is Awesome",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. "
+}
+
+response: 
+{
+    "id": 3,
+    "author": "hasanmumin",
+    "title": "KendoUI is Awesome",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. "
+}
+```
+#### Update Record
+``` 
+url: http://127.0.0.1:8080/posts/3
+method: PUT
+body:
+{
+    "id": 3,
+    "author": "hasanmumin",
+    "title": "Angular is Awesome",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. "
+}
+
+response: 
+{
+    "id": 3,
+    "author": "hasanmumin",
+    "title": "Angular is Awesome",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. "
+}
+```
+
+#### Update Record
+``` 
+url: http://127.0.0.1:8080/posts/3
+method: DELETE
+body: empty
+
+response: 
+{
+    "id": 3,
+    "author": "hasanmumin",
+    "title": "Angular is Awesome",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. "
+}
 ```
 
 ## License

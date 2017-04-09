@@ -35,11 +35,8 @@ impl Configuration {
             return Configuration {
                        database: Database { path: "db.json".to_string() },
                        server: Server {
-                           listeners: vec![Listener {
-                                               port: 8080,
-                                               host: "127.0.0.1".to_string(),
-                                               ltype: ListenerType::http,
-                                           }],
+                            port: 8080,
+                            host: "127.0.0.1".to_string(),                                     
                        },
                    };
         }
@@ -54,21 +51,6 @@ impl Configuration {
 #[derive(Serialize, Deserialize)]
 #[derive(Debug,Clone)]
 pub struct Server {
-    pub listeners: Vec<Listener>,
-}
-
-#[derive(Serialize, Deserialize)]
-#[derive(Debug,Clone)]
-pub enum ListenerType {
-    http,
-    https,
-}
-
-#[derive(Serialize, Deserialize)]
-#[derive(Debug,Clone)]
-pub struct Listener {
-    #[serde(rename = "type")]
-    pub ltype: ListenerType,
     pub host: String,
     pub port: i16,
 }

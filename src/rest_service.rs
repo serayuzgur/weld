@@ -13,7 +13,6 @@ use weld;
 use slog;
 
 pub struct RestService {
-    pub paths: Vec<String>,
     pub logger: slog::Logger,
 }
 
@@ -39,6 +38,7 @@ impl RestService {
         let mut response_mut = response;
         let body = serde_json::to_string(&value).unwrap();
         response_mut.body(&body);
+        debug!(self.logger,"Response {}",&body);
         return futures::future::ok(response_mut).boxed();
     }
 }
@@ -104,7 +104,6 @@ impl Service for RestService {
                         }
                     }
                     "DELETE"=>{
-                        let payload: serde_json::Value = serde_json::from_str(req.body()).unwrap();
                         match db.delete(table,&id) {
                             Some(record) => {db.flush();return self.success(response, &record)}
                             None => return self.error(response, 404, "Record not found"),
