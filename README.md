@@ -10,10 +10,11 @@ Our first aim is to sharpen our rust skills by generating a fake api from the gi
 It may have bugs, missing features but if you contribute they all will be fixed.
 
 ## Version
-### 0.0.1-alpha
-Create a basic running scenario with server, conf etc.
 ### 0.0.1-alpha.1
 All crud operations. 
+### 0.0.1-alpha
+Create a basic running scenario with server, conf etc.
+
 
 ## Techs
 * [**Serde**](https://github.com/serde-rs/serde) for json parsing.
