@@ -1,7 +1,19 @@
 [package]
 name = "weld"
 version = "0.0.1-alpha.1"
+license       = "MIT/Apache-2.0"
 authors = ["serayuzgur <serayuzgur@gmail.com>"]
+description   = """
+A Mock Json Server Framework
+"""
+homepage      = "https://github.com/serayuzgur/weld"
+repository    = "https://github.com/serayuzgur/weld"
+readme        = "README.md"
+keywords      = [ "json", "mock", "server" ]
+exclude       = [
+  ".gitignore",
+  "tests/**/*",
+]
 
 [dependencies]
 # Serde for JSON
