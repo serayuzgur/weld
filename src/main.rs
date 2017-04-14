@@ -20,6 +20,8 @@ extern crate serde_json;
 #[macro_use]
 extern crate slog;
 extern crate slog_term;
+extern crate slog_async;
+
 
 #[macro_use]
 extern crate lazy_static;
@@ -42,14 +44,17 @@ pub mod weld {
     //TODO: take this to a seperate file later.
     use slog;
     use slog_term;
-    use slog::DrainExt;
+    use slog_async;
+    use slog::Drain;
+    use std::sync::Arc;
     use configuration::Configuration;
     use configuration;
     use database::Database;
     use std::sync::Mutex;
+    use std::io::stdout;
 
     lazy_static! {
-        pub static ref ROOT_LOGGER: slog::Logger = slog::Logger::root(slog_term::streamer().build().fuse(),o!());
+        pub static ref ROOT_LOGGER: slog::Logger = slog::Logger::root(Arc::new(slog_async::Async::new(slog_term::CompactFormat::new(slog_term::TermDecorator::new().build()).build().fuse()).build().fuse()), o!());
         pub static ref CONFIGURATION : Mutex<Configuration> = Mutex::new(Configuration::new(&"".to_string()));
         pub static ref DATABASE : Mutex<Database> = Mutex::new(Database::new(&configuration::Database{path:"".to_string()}));
     }

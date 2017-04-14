@@ -36,8 +36,9 @@ futures-cpupool = "*"
 rand = "*"
 
 # Logger
-slog= "*"
-slog-term="*"
+slog= "2"
+slog-term= { git = "https://github.com/slog-rs/term" }
+slog-async= { git = "https://github.com/slog-rs/async" }
 
 time="*"
 lazy_static="*"
