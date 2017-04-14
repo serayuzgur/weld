@@ -32,8 +32,6 @@ mod configuration;
 mod database;
 mod http;
 
-
-use futures_cpupool::CpuPool;
 use server::Server;
 use configuration::Configuration;
 use std::env::args;
@@ -69,9 +67,7 @@ fn main() {
             configuration.load(&"weld.json".to_string());
         }
     }
-    let thread_pool = CpuPool::new_num_cpus();
-
-    let server = Server::new(&configuration.server,&thread_pool);
+    let server = Server::new(&configuration.server);
 
     load_db(&configuration);
     // Always call this at the end.

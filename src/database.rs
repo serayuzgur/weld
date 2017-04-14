@@ -134,8 +134,8 @@ impl Database {
 					None => {
 						let as_value = serde_json::to_value(&value).unwrap();
 						array.push(as_value.clone());
-						debug!(&self.logger, "Inserted  {:?}", &value);
-						return Some(as_value);
+						debug!(&self.logger, "Insert - Value  {}", &as_value);
+						return Some(as_value.clone());
 					}
 					Some(idx) => {
 						error!(&self.logger,
@@ -173,9 +173,8 @@ impl Database {
 										return None;
 									}
 									Some(idx) => {
-										let old_value = array.get_mut(idx)
-											.unwrap();
 										{
+											let old_value = array.get_mut(idx).unwrap();
 											let old_map = 
 												old_value.as_object_mut()
 												.unwrap();
@@ -183,9 +182,10 @@ impl Database {
 												old_map.insert(key.to_string(), value.get(key).unwrap().clone());
 											}
 										}
+										let new_value = array.get(idx).unwrap();
 										info!(&self.logger, "Updated - Ok id: {:?}", &id);
-										debug!(&self.logger, "Updated - Value  {:?}", &value);
-										return Some(old_value.clone());
+										debug!(&self.logger, "Updated - Value  {}", &new_value);
+										return Some(new_value.clone());
 									}
 								}
 							}
@@ -238,9 +238,10 @@ impl Database {
 		}
 	}
 
+	/// Flush all the changes to the file.
 	pub fn flush(&mut self) {
 		let new_db = &serde_json::to_string(&self.data).unwrap();
-		debug!(&self.logger, "Flush -  Started");
+		debug!(&self.logger, "Flush - Started");
 		let bytes = new_db.as_bytes();
 		let mut file = OpenOptions::new()
 			.read(true)
@@ -252,7 +253,7 @@ impl Database {
 				match file.write_all(bytes){
 					Ok(_)=>{
 						let result = file.sync_all();
-						info!(&self.logger, "Flush - Ok  File {:?} Result: {:?}", &file, &result);
+						info!(&self.logger, "Flush - Ok File {:?} Result: {:?}", &file, &result);
 					}
 					Err(e)=>{
 						error!(&self.logger, "Flush - Error Can't write file File: {:?} Error: {:?}", &file,e)

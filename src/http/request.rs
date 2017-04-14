@@ -88,8 +88,8 @@ pub fn decode(buf: &mut BytesMut) -> io::Result<Option<Request>> {
             .map(|h| (toslice(h.name.as_bytes()), toslice(h.value)))
             .collect();
 
+        //TODO: change body to slice.
         let body_vec = buf.iter().cloned().collect();
-
         let body = string::String::from_utf8(body_vec)
             .unwrap()
             .split("\r\n\r\n")

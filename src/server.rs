@@ -11,18 +11,15 @@ use http;
 
 pub struct Server<'a> {
     configuration: &'a configuration::Server,
-    thread_pool: &'a futures_cpupool::CpuPool,
     logger: slog::Logger,
 }
 
 
 impl<'a> Server<'a> {
-    pub fn new(config: &'a configuration::Server,
-               thread_pool: &'a futures_cpupool::CpuPool)
+    pub fn new(config: &'a configuration::Server )
                -> Server<'a> {
         Server {
             configuration: config,
-            thread_pool: thread_pool,
             logger: weld::ROOT_LOGGER.new(o!()),
         }
     }

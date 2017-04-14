@@ -182,7 +182,7 @@ response:
 }
 ```
 
-#### Update Record
+#### Delete Record
 ``` 
 url: http://127.0.0.1:8080/posts/3
 method: DELETE
