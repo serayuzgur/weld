@@ -24,7 +24,7 @@ impl RestService {
                  message: &str)
                  -> BoxFuture<Response, io::Error> {
         let mut response_mut = response;
-        error!(self.logger, message);
+        error!(self.logger, &message);
         response_mut.status_code(code, message);
         response_mut.body(message);
         return futures::future::ok(response_mut).boxed();
