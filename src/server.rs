@@ -19,12 +19,9 @@ impl<'a> Server<'a> {
         }
     }
     pub fn start(&self) {
-        info!(self.logger,
-              "Server - Configuration {:?}",
-              self.configuration);
         let endpoint =
             format!("{}:{}", self.configuration.host, self.configuration.port).parse().unwrap();
-        info!(self.logger, "Server - Started!");
+        info!(self.logger, "Server - Started ! {}", &endpoint);
         let thread_pool = CpuPool::new_num_cpus();
 
         Http::new()

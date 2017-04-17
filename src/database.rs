@@ -63,7 +63,6 @@ impl Database {
 			}
 		}
 		let new_data: serde_json::Value = serde_json::from_str(&contents).expect("Invalid JSON format. Check provided db. Terminating...");
-		debug!(self.logger, "{}", &new_data);
 		self.data = new_data;
 		info!(self.logger,
 			  "Database - Ok : {:?}",
