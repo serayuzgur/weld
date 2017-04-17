@@ -1,12 +1,7 @@
 //! # Weld
 //!
 
-extern crate bytes;
-extern crate tokio_io;
-extern crate tokio_core;
-extern crate tokio_proto;
-extern crate tokio_service;
-extern crate tokio_minihttp;
+extern crate hyper;
 
 extern crate rand;
 
@@ -32,7 +27,6 @@ mod rest_service;
 mod server;
 mod configuration;
 mod database;
-mod http;
 
 use server::Server;
 use configuration::Configuration;
@@ -51,7 +45,6 @@ pub mod weld {
     use configuration;
     use database::Database;
     use std::sync::Mutex;
-    use std::io::stdout;
 
     lazy_static! {
         pub static ref ROOT_LOGGER: slog::Logger = slog::Logger::root(Arc::new(slog_async::Async::new(slog_term::CompactFormat::new(slog_term::TermDecorator::new().build()).build().fuse()).build().fuse()), o!());
