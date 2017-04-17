@@ -1,5 +1,4 @@
 extern crate serde_json;
-
 extern crate futures;
 extern crate futures_cpupool;
 
@@ -54,7 +53,7 @@ impl Service for RestService {
     type Future = futures::BoxFuture<Response, hyper::Error>;
 
     fn call(&self, req: Request) -> Self::Future {
-        let boxed = self.thread_pool.spawn_fn(move || {
+        self.thread_pool.spawn_fn(move || {
             let path: &String = &req.path().into();
             let parts = path.split("/").filter(|x| !x.is_empty()).collect::<Vec<_>>().clone();
             let mut db = weld::DATABASE.lock().unwrap();
@@ -118,9 +117,7 @@ impl Service for RestService {
                 _ => {
                     return RestService::error(response, StatusCode::InternalServerError, "Nested structures are not implemented yet.");
                 }
-            }});
-            boxed.boxed()
-          
+            }}).boxed()      
         }
     }
 

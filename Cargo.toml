@@ -1,44 +1,36 @@
 [package]
 name = "weld"
-version = "0.0.1-alpha.1"
-license       = "MIT/Apache-2.0"
+version = "0.0.1-alpha.2"
+license = "MIT/Apache-2.0"
 authors = ["serayuzgur <serayuzgur@gmail.com>"]
-description   = """
-A Mock Json Server Framework
-"""
+description   = "Full fake REST API generator."
 homepage      = "https://github.com/serayuzgur/weld"
 repository    = "https://github.com/serayuzgur/weld"
 readme        = "README.md"
-keywords      = [ "json", "mock", "server" ]
+keywords      = [ "json", "mock", "server","fake","api" ]
 exclude       = [
   ".gitignore",
   "tests/**/*",
+  ".travis.yml",
+  "db.json"
 ]
 
 [dependencies]
 # Serde for JSON
-serde="*"
-serde_derive="*"
-serde_json="*"
+serde="0.9.13"
+serde_derive="0.9.13"
+serde_json="0.9.10"
 
-# Tokio for Server
-bytes = "*"
-futures = "*"
-tokio-io = "*"
-tokio-core = "*"
-tokio-proto = "*"
-tokio-service = "*"
-hyper = { git = "https://github.com/hyperium/hyper" }
-net2="*"
-httparse="*"
-# misc support for thread pools, random numbers, and json
-futures-cpupool = "*"
-rand = "*"
+bytes = "0.4.2"
+futures = "0.1.13"
+hyper = { version= "0.11.0-a.0", git = "https://github.com/hyperium/hyper" }
+futures-cpupool = "0.1.5"
+rand = "0.3.15"
 
 # Logger
-slog= "2"
-slog-term= { git = "https://github.com/slog-rs/term" }
-slog-async= { git = "https://github.com/slog-rs/async" }
+slog= "2.0.*"
+slog-term= { version= "2.0.0-4.0", git = "https://github.com/slog-rs/term" }
+slog-async= { version= "2.0.*", git = "https://github.com/slog-rs/async" }
 
-time="*"
-lazy_static="*"
+time="0.1.36"
+lazy_static="0.2.8"

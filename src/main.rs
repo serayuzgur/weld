@@ -9,7 +9,7 @@ extern crate futures;
 extern crate futures_cpupool;
 
 #[macro_use]
-extern crate serde_derive; // we have to define it here because macros must be at root 
+extern crate serde_derive;
 extern crate serde_json; 
 
 #[macro_use]
@@ -21,7 +21,6 @@ extern crate slog_async;
 #[macro_use]
 extern crate lazy_static;
 extern crate time;
-extern crate httparse;
 
 mod rest_service;
 mod server;
@@ -54,9 +53,7 @@ pub mod weld {
 }
 
 fn main() {
-    //Logger
     info!(weld::ROOT_LOGGER, "Application started";"started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
-
     let mut configuration =  weld::CONFIGURATION.lock().unwrap();
     match args().nth(1) {
         Some(path) => configuration.load(&path.to_string()),
@@ -65,11 +62,9 @@ fn main() {
             configuration.load(&"weld.json".to_string());
         }
     }
-    let server = Server::new(&configuration.server);
-
     load_db(&configuration);
     // Always call this at the end.
-    server.start();
+    Server::new(&configuration.server).start();
 }
 
 fn load_db(configuration: &Configuration){
