@@ -5,17 +5,11 @@ Full fake REST API generator.
 
 This project is heavily inspired by [json-server](https://github.com/typicode/json-server), written with rust. 
 
-
 ## Synopsis
-Our first aim is to sharpen our rust skills by generating a fake api from the given data source (JSON). 
+Our first aim is to generate a fake api from the given data source (JSON). 
 It may have bugs, missing features but if you contribute they all will be fixed.
 
-## Version
-### 0.0.1-alpha.1
-All crud operations. 
-### 0.0.1-alpha
-Create a basic running scenario with server, conf etc.
-
+## Version [CHANGELOG](./CHANGELOG.md)
 
 ## Techs
 * [**Serde**](https://github.com/serde-rs/serde) for json parsing.

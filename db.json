@@ -1,1 +1,16 @@
-{"comments":[{"body":"some comment","id":1,"postId":1}],"posts":[{"author":"serayuzgur","body":"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.","id":1,"title":"Rust Rocks!"},{"author":"kamilbukum","body":"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.","id":2,"title":"TypeScript is Awesome"}]}
+{
+    "posts": [
+        {
+            "author": "serayuzgur",
+            "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.",
+            "id": 1,
+            "title": "Rust Rocks!"
+        },
+        {
+            "author": "kamilbukum",
+            "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.",
+            "id": 2,
+            "title": "TypeScript is Awesome"
+        }
+    ]
+}
