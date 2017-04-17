@@ -28,7 +28,7 @@ tokio-io = "*"
 tokio-core = "*"
 tokio-proto = "*"
 tokio-service = "*"
-tokio-minihttp = { git = "https://github.com/tokio-rs/tokio-minihttp" }
+hyper = { git = "https://github.com/hyperium/hyper" }
 net2="*"
 httparse="*"
 # misc support for thread pools, random numbers, and json
