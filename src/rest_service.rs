@@ -12,6 +12,9 @@ use hyper;
 use futures::Stream;
 use futures::Future;
 use futures::future::ok;
+use hyper::header::ContentType;
+
+use database::Errors::{NotFound, BadData, Duplicate};
 
 pub struct RestService {
     pub logger: slog::Logger,
@@ -26,7 +29,7 @@ impl RestService {
                  -> futures::BoxFuture<Response, hyper::Error> {
         // error!(self.logger, "{}",&message);
 
-        return ok(response.with_header(hyper::header::ContentType::plaintext())
+        return ok(response.with_header(ContentType::plaintext())
                 .with_status(code)
                 .with_body(message.to_string()))
             .boxed();
@@ -34,9 +37,11 @@ impl RestService {
 
     /// Prepares an success response, wraps to BoxFuture.
     pub fn success(response: Response,
+                   code: StatusCode,
                    value: &serde_json::Value)
                    -> futures::BoxFuture<Response, hyper::Error> {
-        return ok(response.with_header(hyper::header::ContentType::json())
+        return ok(response.with_header(ContentType::json())
+                .with_status(code)
                 .with_body(serde_json::to_vec(&value).unwrap()))
             .boxed();
     }
@@ -71,8 +76,13 @@ impl RestService {
            -> futures::BoxFuture<Response, hyper::Error> {
         let mut db = weld::DATABASE.lock().unwrap();
         match db.read(table.as_str(), &id) {
-            Some(record) => return Self::success(response, &record),
-            None => return Self::error(response, StatusCode::NotFound, "Record not found"),
+            Ok(record) => return Self::success(response, StatusCode::Ok, &record),
+            Err(error) => {
+                match error {
+                    NotFound(msg) => Self::error(response, StatusCode::NotFound, msg.as_str()),
+                    _ => Self::error(response, StatusCode::InternalServerError, "Server Error"),
+                }
+            }
         }
     }
 
@@ -89,11 +99,26 @@ impl RestService {
                 let mut payload: serde_json::Value =
                     serde_json::from_slice(body.to_vec().as_slice()).unwrap();
                 match db.insert(table.as_str(), payload.as_object_mut().unwrap()) {
-                    Some(record) => {
+                    Ok(record) => {
                         db.flush();
-                        return Self::success(response, &record);
+                        return Self::success(response, StatusCode::Created, &record);
                     }
-                    None => return Self::error(response, StatusCode::NotFound, "Record not found"),
+                    Err(error) => {
+                        match error {
+                            NotFound(msg) => {
+                                Self::error(response, StatusCode::NotFound, msg.as_str())
+                            }
+                            Duplicate(msg) => {
+                                Self::error(response, StatusCode::Conflict, msg.as_str())
+                            }
+                            _ => {
+                                Self::error(response,
+                                            StatusCode::InternalServerError,
+                                            "Server Error")
+                            }
+
+                        }
+                    }
                 }
             })
             .boxed()
@@ -114,11 +139,25 @@ impl RestService {
                 let mut payload: serde_json::Value =
                     serde_json::from_slice(body.to_vec().as_slice()).unwrap();
                 match db.update(table.as_str(), payload.as_object().unwrap().clone()) {
-                    Some(record) => {
+                    Ok(record) => {
                         db.flush();
-                        return Self::success(response, &record);
+                        return Self::success(response, StatusCode::Ok, &record);
                     }
-                    None => return Self::error(response, StatusCode::NotFound, "Record not found"),
+                    Err(error) => {
+                        match error {
+                            NotFound(msg) => {
+                                Self::error(response, StatusCode::NotFound, msg.as_str())
+                            }
+                            BadData(msg) => {
+                                Self::error(response, StatusCode::Conflict, msg.as_str())
+                            }
+                            _ => {
+                                Self::error(response,
+                                            StatusCode::InternalServerError,
+                                            "Server Error")
+                            }
+                        }
+                    }
                 }
             })
             .boxed()
@@ -132,11 +171,18 @@ impl RestService {
               -> futures::BoxFuture<Response, hyper::Error> {
         let mut db = weld::DATABASE.lock().unwrap();
         match db.delete(table.as_str(), &id) {
-            Some(record) => {
+            Ok(record) => {
                 db.flush();
-                return Self::success(response, &record);
+                return Self::success(response, StatusCode::Ok, &record);
             }
-            None => return Self::error(response, StatusCode::NotFound, "Record not found"),
+            Err(error) => {
+                match error {
+                    NotFound(msg) => {
+                        return Self::error(response, StatusCode::NotFound, msg.as_str());
+                    }
+                    _ => Self::error(response, StatusCode::NotFound, "Server Error"),
+                }
+            }
         }
     }
 }
@@ -155,7 +201,9 @@ impl Service for RestService {
             // Table list
             0 => {
                 let db = weld::DATABASE.lock().unwrap();
-                Self::success(response, &serde_json::to_value(&db.tables()).unwrap())
+                Self::success(response,
+                              StatusCode::Ok,
+                              &serde_json::to_value(&db.tables()).unwrap())
             }  
             1 | 2 => {
                 // Record list or record
