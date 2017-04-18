@@ -3,7 +3,6 @@ extern crate futures;
 extern crate futures_cpupool;
 
 use std::vec::Vec;
-use std::io;
 
 use weld;
 use slog;
@@ -144,8 +143,8 @@ impl Service for RestService {
 
     fn call(&self, req: Request) -> Self::Future {
         let parts = Self::split_path(req.path().to_string());
-        let response = Response::new();
-        // TODO: response.with_header("Content-Type", "application/json");
+        let response = Response::new().with_header(hyper::header::ContentType::json());
+
         match parts.len() {
             // Table list
             0 => {
