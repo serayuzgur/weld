@@ -3,6 +3,8 @@ extern crate serde_json;
 use std::fs::File;
 use std::io::prelude::*;
 use weld;
+use std::path::Path;
+
 
 #[derive(Serialize, Deserialize)]
 #[derive(Debug,Clone)]
@@ -12,7 +14,7 @@ pub struct Configuration {
 }
 
 impl Configuration {
-    pub fn new(path: &String) -> Configuration {
+    pub fn new (path: &str) -> Configuration {
         if path != "" {
             info!(weld::ROOT_LOGGER, "Configuration - Reading Path: {:?}", &path);
             let mut file = File::open(path).expect("Configuration - Error Can't read provided configuration. Terminating...");
@@ -41,7 +43,7 @@ impl Configuration {
                    };
         }
     }
-    pub fn load(&mut self, path: &String) {
+    pub fn load(&mut self, path: &str) {
         let configuration = Configuration::new(&path);
         self.server = configuration.server;
         self.database = configuration.database;

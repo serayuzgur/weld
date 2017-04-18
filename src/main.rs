@@ -47,7 +47,7 @@ pub mod weld {
 
     lazy_static! {
         pub static ref ROOT_LOGGER: slog::Logger = slog::Logger::root(Arc::new(slog_async::Async::new(slog_term::CompactFormat::new(slog_term::TermDecorator::new().build()).build().fuse()).build().fuse()), o!());
-        pub static ref CONFIGURATION : Mutex<Configuration> = Mutex::new(Configuration::new(&"".to_string()));
+        pub static ref CONFIGURATION : Mutex<Configuration> = Mutex::new(Configuration::new(""));
         pub static ref DATABASE : Mutex<Database> = Mutex::new(Database::new(&configuration::Database{path:"".to_string()}));
     }
 }
@@ -56,10 +56,10 @@ fn main() {
     info!(weld::ROOT_LOGGER, "Application started";"started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
     let mut configuration =  weld::CONFIGURATION.lock().unwrap();
     match args().nth(1) {
-        Some(path) => configuration.load(&path.to_string()),
+        Some(path) => configuration.load(path.as_str()),
         None => {
             info!(weld::ROOT_LOGGER,"Program arguments not found.");
-            configuration.load(&"weld.json".to_string());
+            configuration.load("weld.json");
         }
     }
     load_db(&configuration);
