@@ -25,14 +25,20 @@ impl RestService {
                  message: &str)
                  -> futures::BoxFuture<Response, hyper::Error> {
         // error!(self.logger, "{}",&message);
-        return ok(response.with_status(code).with_body(message.to_string())).boxed();
+
+        return ok(response.with_header(hyper::header::ContentType::plaintext())
+                .with_status(code)
+                .with_body(message.to_string()))
+            .boxed();
     }
 
     /// Prepares an success response, wraps to BoxFuture.
     pub fn success(response: Response,
                    value: &serde_json::Value)
                    -> futures::BoxFuture<Response, hyper::Error> {
-        return ok(response.with_body(serde_json::to_vec(&value).unwrap())).boxed();
+        return ok(response.with_header(hyper::header::ContentType::json())
+                .with_body(serde_json::to_vec(&value).unwrap()))
+            .boxed();
     }
 
     /// Splits '/'  and filters empty strings
@@ -143,7 +149,7 @@ impl Service for RestService {
 
     fn call(&self, req: Request) -> Self::Future {
         let parts = Self::split_path(req.path().to_string());
-        let response = Response::new().with_header(hyper::header::ContentType::json());
+        let response = Response::new();
 
         match parts.len() {
             // Table list
