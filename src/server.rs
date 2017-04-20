@@ -1,5 +1,5 @@
 use configuration;
-use rest_service;
+use service;
 use slog;
 use weld;
 use hyper::server::Http;
@@ -26,7 +26,7 @@ impl<'a> Server<'a> {
 
         Http::new()
             .bind(&endpoint, move || {
-                Ok(rest_service::RestService {
+                Ok(service::RestService {
                        logger: weld::ROOT_LOGGER.new(o!()),
                        thread_pool: thread_pool.clone(),
                    })

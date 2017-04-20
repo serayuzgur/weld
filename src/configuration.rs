@@ -3,8 +3,6 @@ extern crate serde_json;
 use std::fs::File;
 use std::io::prelude::*;
 use weld;
-use std::path::Path;
-
 
 #[derive(Serialize, Deserialize)]
 #[derive(Debug,Clone)]
