@@ -59,31 +59,55 @@ Configuration file is a very simple json file which is responsible to hold serve
 ```
 
 ### Database
-Database is a simple json file. Currently it supports the structure `Object -> Array<Object>`.
+Database is a simple json file.
 
 ```json
 {
-    "comments": [
-        {
-            "body": "some comment",
-            "id": 1,
-            "postId": 1
-        }
-    ],
+    "owner": {
+        "name": "seray",
+        "surname": "uzgur"
+    },
     "posts": [
         {
-            "author": "serayuzgur",
-            "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.",
+            "author": {
+                "name": "seray",
+                "surname": "uzgur"
+            },
+            "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.",
             "id": 1,
+            "tags": [
+                {
+                    "id": 1,
+                    "name": "tech"
+                },
+                {
+                    "id": 2,
+                    "name": "web"
+                }
+            ],
             "title": "Rust Rocks!"
         },
         {
-            "author": "kamilbukum",
-            "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.",
+            "author": {
+                "name": "kamil",
+                "surname": "bukum"
+            },
+            "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.",
             "id": 2,
+            "tags": [
+                {
+                    "id": 1,
+                    "name": "tech"
+                },
+                {
+                    "id": 2,
+                    "name": "web"
+                }
+            ],
             "title": "TypeScript is Awesome"
         }
-    ]
+    ],
+    "version": "10.1.1"
 }
 ```
 
@@ -99,9 +123,10 @@ Api usage is pretty simple. For now it does not support filters one other query 
 * Insert Record \<host\>:\<port\>/\<table\> POST
 * Update Record \<host\>:\<port\>/\<table\>/\<id\> PUT
 * Delete Record \<host\>:\<port\>/\<table\>/\<id\> DELETE
+* Get Nested \<host\>:\<port\>/\<table\>/\<id\><field\>/\<id\>... GET
 
 #### Get List
-``` 
+```json
 url: http://127.0.0.1:8080/posts 
 method: GET
 body: empty
@@ -123,72 +148,181 @@ response:
 ]
 ```
 #### Get Record
-``` 
+```json
 url: http://127.0.0.1:8080/posts/1 
 method: GET
 body: empty
 
 response: 
 {
-  "author": "serayuzgur",
-  "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.",
-  "id": 1,
-  "title": "Rust Rocks!"
+    "author": {
+        "name": "seray",
+        "surname": "uzgur"
+    },
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.",
+    "id": 1,
+    "tags": [
+        {
+            "id": 1,
+            "name": "tech"
+        },
+        {
+            "id": 2,
+            "name": "web"
+        }
+    ],
+    "title": "Rust Rocks!"
 }
 ```
 #### Insert Record
-``` 
+```json
 url: http://127.0.0.1:8080/posts
 method: POST
 body:
 {
-    "id": 3,
-    "author": "hasanmumin",
-    "title": "KendoUI is Awesome",
-    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero."
+  "author": {
+    "name": "hasan",
+    "surname": "mumin"
+  },
+  "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.",
+  "id": 3,
+  "tags": [
+    {
+      "id": 1,
+      "name": "tech"
+    },
+    {
+      "id": 2,
+      "name": "web"
+    }
+  ],
+  "title": "KendoUI Rocks!"
 }
 
 response: 
 {
-    "id": 3,
-    "author": "hasanmumin",
-    "title": "KendoUI is Awesome",
-    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero."
+  "author": {
+    "name": "hasan",
+    "surname": "mumin"
+  },
+  "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.",
+  "id": 3,
+  "tags": [
+    {
+      "id": 1,
+      "name": "tech"
+    },
+    {
+      "id": 2,
+      "name": "web"
+    }
+  ],
+  "title": "KendoUI Rocks!"
 }
 ```
 #### Update Record
-``` 
+```json
 url: http://127.0.0.1:8080/posts/3
 method: PUT
 body:
 {
-    "id": 3,
-    "author": "hasanmumin",
-    "title": "Angular is Awesome",
-    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero."
+  "author": {
+    "name": "hasan",
+    "surname": "mumin"
+  },
+  "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.",
+  "id": 3,
+  "tags": [
+    {
+      "id": 1,
+      "name": "tech"
+    },
+    {
+      "id": 2,
+      "name": "web"
+    }
+  ],
+  "title": "KendoUI Rocks!"
 }
 
 response: 
 {
-    "id": 3,
-    "author": "hasanmumin",
-    "title": "Angular is Awesome",
-    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero."
+  "author": {
+    "name": "hasan",
+    "surname": "mumin"
+  },
+  "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.",
+  "id": 3,
+  "tags": [
+    {
+      "id": 1,
+      "name": "tech"
+    },
+    {
+      "id": 2,
+      "name": "web"
+    }
+  ],
+  "title": "Angular Rocks!"
 }
 ```
 
 #### Delete Record
-``` 
+```json
 url: http://127.0.0.1:8080/posts/3
 method: DELETE
 body: empty
 
 response: 
 {
-    "id": 3,
-    "author": "hasanmumin",
-    "title": "Angular is Awesome",
-    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero."
+  "author": {
+    "name": "hasan",
+    "surname": "mumin"
+  },
+  "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.",
+  "id": 3,
+  "tags": [
+    {
+      "id": 1,
+      "name": "tech"
+    },
+    {
+      "id": 2,
+      "name": "web"
+    }
+  ],
+  "title": "KendoUI Rocks!"
+}
+```
+#### Get Nested
+```json
+url: http://127.0.0.1:8080/posts/1/author
+method: GET
+body: empty
+
+response:
+{
+    "name": "seray",
+    "surname": "uzgur"
+}
+```
+```json
+url: http://127.0.0.1:8080/posts/1/author/name
+method: GET
+body: empty
+
+response:
+"seray"
+```
+```json
+url: http://127.0.0.1:8080/posts/1/tags/1
+method: GET
+body: empty
+
+response:
+{
+    "id": 1,
+    "name": "tech"
 }
 ```
 
