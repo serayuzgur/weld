@@ -4,7 +4,6 @@ use std::cmp::{PartialEq, Eq};
 pub fn split_query(query: Option<&str>) -> Vec<Query> {
     match query {
         Some(params) => {
-            // params.split("&").filter(|x| !x.is_empty()).map(String::from).collect::<Vec<String>>()
             let mut queries = Vec::<Query>::new();
             for param in params.split("&") {
                 if param.is_empty() {

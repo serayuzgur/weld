@@ -17,15 +17,11 @@ pub struct RestService {
 }
 
 impl RestService {
-   
     #[inline]
     /// Gets records or spesific record from db and returns as a result.
-    fn get(table: String,
-           id: i64,
-           response: Response)
-           -> BoxFuture<Response, hyper::Error> {
+    fn get(paths: &mut Vec<String>, response: Response) -> BoxFuture<Response, hyper::Error> {
         let mut db = weld::DATABASE.lock().unwrap();
-        match db.read(table.as_str(), &id) {
+        match db.read(paths) {
             Ok(record) => return utils::success(response, StatusCode::Ok, &record),
             Err(error) => {
                 match error {
@@ -38,10 +34,7 @@ impl RestService {
 
     #[inline]
     /// Creates the record. Returns the persisted version.
-    fn post(req: Request,
-            table: String,
-            response: Response)
-            -> BoxFuture<Response, hyper::Error> {
+    fn post(req: Request, table: String, response: Response) -> BoxFuture<Response, hyper::Error> {
         req.body()
             .concat()
             .and_then(move |body| {
@@ -63,8 +56,8 @@ impl RestService {
                             }
                             _ => {
                                 utils::error(response,
-                                            StatusCode::InternalServerError,
-                                            "Server Error")
+                                             StatusCode::InternalServerError,
+                                             "Server Error")
                             }
 
                         }
@@ -103,8 +96,8 @@ impl RestService {
                             }
                             _ => {
                                 utils::error(response,
-                                            StatusCode::InternalServerError,
-                                            "Server Error")
+                                             StatusCode::InternalServerError,
+                                             "Server Error")
                             }
                         }
                     }
@@ -115,10 +108,7 @@ impl RestService {
 
     #[inline]
     /// Deletes the record. Returns the data back.
-    fn delete(table: String,
-              id: i64,
-              response: Response)
-              -> BoxFuture<Response, hyper::Error> {
+    fn delete(table: String, id: i64, response: Response) -> BoxFuture<Response, hyper::Error> {
         let mut db = weld::DATABASE.lock().unwrap();
         match db.delete(table.as_str(), &id) {
             Ok(record) => {
@@ -144,21 +134,21 @@ impl Service for RestService {
     type Future = BoxFuture<Response, hyper::Error>;
 
     fn call(&self, req: Request) -> Self::Future {
-        let parts = utils::split_path(req.path().to_string());
+        let mut path_parts = utils::split_path(req.path().to_string());
         let response = Response::new();
 
-        match parts.len() {
+        match path_parts.len() {
             // Table list
             0 => {
                 let db = weld::DATABASE.lock().unwrap();
                 utils::success(response,
-                              StatusCode::Ok,
-                              &serde_json::to_value(&db.tables()).unwrap())
+                               StatusCode::Ok,
+                               &serde_json::to_value(&db.tables()).unwrap())
             }  
-            1 | 2 => {
+            _ => {
                 // Record list or record
-                let table = parts.get(0).unwrap().clone();
-                let id = match utils::decide_id(parts.get(1)) {
+                let table = path_parts.get(0).unwrap().clone();
+                let id = match utils::decide_id(path_parts.get(1)) {
                     Ok(result) => result,
                     Err(e) => {
                         return utils::error(response, StatusCode::PreconditionFailed, e.as_str());
@@ -166,17 +156,12 @@ impl Service for RestService {
                 };
 
                 match req.method() {
-                    &Get => Self::get(table, id, response),   
+                    &Get => Self::get(&mut path_parts, response),   
                     &Post => Self::post(req, table, response),   
                     &Put => Self::put(req, table, id, response),   
                     &Delete => Self::delete(table, id, response),
                     _ => utils::error(response, StatusCode::MethodNotAllowed, "Method Not Allowed"),
                 }
-            }
-            _ => {
-                return utils::error(response,
-                                   StatusCode::InternalServerError,
-                                   "Nested structures are not implemented yet.");
             }
         }
     }

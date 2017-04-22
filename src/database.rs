@@ -9,6 +9,7 @@ use std::io::Read;
 use std::io::Write;
 use std::fs::OpenOptions;
 use serde_json::Value;
+use serde_json::Value::{Array, Object};
 use serde_json::Map;
 use rand;
 
@@ -24,6 +25,7 @@ pub struct Database {
     data: serde_json::Value,
 }
 
+#[derive(Clone)]
 #[derive(Debug)]
 pub enum Errors {
     NotFound(String),
@@ -72,43 +74,71 @@ impl Database {
         info!(self.logger, "Database - Ok : {:?}", self.configuration.path);
     }
 
-    /// Reads the desired result with the given id.
-    pub fn read(&mut self, key: &str, id: &i64) -> Result<Value, Errors> {
-        let ref mut data = self.data;
-        let db: &mut Map<String, Value> = data.as_object_mut()
-            .expect("Database is invalid. You can't mock API with it. Terminating...");
-        match db.get_mut(key) {
-            Some(en_map) => {
-                let array: &mut Vec<Value> = en_map.as_array_mut()
-                    .expect("Table is invalid. For now it can only be Array<Map>. Terminating...");
-                if id < &0 {
-                    return Ok(serde_json::to_value(array.clone()).unwrap());
-                }
-                match Database::find_index(array, &id) {
+    pub fn decide_id(val: &String) -> i64 {
+        match i64::from_str_radix(val.as_str(), 10) {
+            Ok(parsed) => parsed,
+            Err(e) => -1,
+        }
+    }
+
+    pub fn get_object(&self, keys: &mut Vec<String>, json_object: &Value) -> Result<Value, Errors> {
+        let key = keys.remove(0);
+        let mut value = Value::Null;
+        match json_object {
+            &Array(ref array) => {
+                let id = Self::decide_id(&key);
+                match Database::find_index(&array, &id) {
                     None => {
-                        Self::error(&self.logger,
-                                    Errors::NotFound(format!("Read - Error  id: {:?}", &id)))
+                        return Self::error(&self.logger,
+                                           Errors::NotFound(format!("Read - Error  path: {:?} ",
+                                                                    &key)));
                     }
                     Some(idx) => {
                         match array.get(idx) {
-                            Some(value) => {
-                                info!(&self.logger, "Read - Ok  id: {:?}", &id);
-                                debug!(&self.logger, "Read - Value {}", &value);
-                                return Ok(value.clone());
+                            Some(obj) => {
+                                value = obj.clone();
                             }
                             None => {
-                                Self::error(&self.logger,
-                                            Errors::NotFound(format!("Read - Error  id: {:?}",
-                                                                     &id)))
+                                return Self::error(&self.logger,
+                                                   Errors::NotFound(format!("Read - Error  \
+                                                                             path: {:?} ",
+                                                                            &key)));
                             }
                         }
                     }
                 }
             }
-            None => {
-                error!(self.logger, "Table not found {}", &key);
-                return Err(Errors::NotFound(format!("Table not found {}", &key)));
+            &Object(ref obj) => {
+                value = match obj.get(key.as_str()) {
+                    Some(obj) => obj.clone(),
+                    None => {
+                        return Self::error(&self.logger,
+                                           Errors::NotFound(format!("Read - Error  path: {:?} ",
+                                                                    &key)));
+                    }
+                }
             }
+            _ => {
+                return Self::error(&self.logger,
+                                   Errors::NotFound(format!("Read - Error  path: {:?} ", &key)));
+            }
+        };
+        if keys.len() == 0 {
+            info!(&self.logger, "Read - Ok  path: {:?} last:{:?}", &keys, &key);
+            debug!(&self.logger, "Read - Value {}", &value);
+            return Ok(value);
+        } else {
+            // Consume key
+            return self.get_object(keys, &mut value);
+        }
+    }
+
+    /// Reads the desired result with the given path.
+    pub fn read(&self, keys: &mut Vec<String>) -> Result<Value, Errors> {
+        let ref data = self.data;
+        match &self.get_object(keys, data) {
+            &Ok(ref obj) => Ok(obj.clone()),
+            &Err(ref msg) => Err(msg.clone()),
         }
     }
 
@@ -247,7 +277,7 @@ impl Database {
             }
             None => {
                 Self::error(&self.logger,
-                           Errors::NotFound(format!("Table not found {}", &key)))
+                            Errors::NotFound(format!("Table not found {}", &key)))
             }
         }
     }
@@ -300,7 +330,7 @@ impl Database {
     }
 
     /// Find the index of the element with the given target id.
-    fn find_index(vec: &mut Vec<Value>, target: &i64) -> Option<usize> {
+    fn find_index(vec: &Vec<Value>, target: &i64) -> Option<usize> {
         let mut index = 0;
         for value in vec.iter() {
             let map = value.as_object().unwrap();
