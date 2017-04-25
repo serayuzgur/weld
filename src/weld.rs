@@ -12,5 +12,5 @@ use std::sync::Mutex;
 lazy_static! {
     pub static ref ROOT_LOGGER: slog::Logger = slog::Logger::root(Arc::new(slog_async::Async::new(slog_term::CompactFormat::new(slog_term::TermDecorator::new().build()).build().fuse()).build().fuse()), o!());
     pub static ref CONFIGURATION : Mutex<Configuration> = Mutex::new(Configuration::new(""));
-    pub static ref DATABASE : Mutex<Database> = Mutex::new(Database::new(&configuration::Database{path:"".to_string()}));
+    pub static ref DATABASE : Arc<Mutex<Database>> = Arc::new(Mutex::new(Database::new(&configuration::Database{path:"".to_string()})));
 }

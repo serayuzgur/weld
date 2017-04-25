@@ -34,25 +34,6 @@ pub fn split_path(path: String) -> Vec<String> {
 }
 
 
-
-/// Helps to decide id value.
-pub fn decide_id(part: Option<&String>) -> Result<i64, String> {
-    match part {
-        Some(val) => {
-            if !val.is_empty() {
-                match i64::from_str_radix(val, 10) {
-                    Ok(parsed) => Ok(parsed),
-                    Err(e) => return Err(format!("Non parsable id Error: {}", e)),
-                }
-            } else {
-                Ok(-1)
-            }
-        }
-        None => Ok(-1),
-    }
-}
-
-
 #[cfg(test)]
 mod tests {
     use super::*;

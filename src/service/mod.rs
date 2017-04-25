@@ -9,7 +9,7 @@ use hyper;
 use futures::{Stream, Future, BoxFuture};
 use futures_cpupool::CpuPool;
 use serde_json;
-use database::Errors::{NotFound, BadData, Duplicate};
+use database::errors::Errors::{NotFound, BadData, Duplicate};
 
 pub struct RestService {
     pub logger: slog::Logger,
@@ -19,9 +19,9 @@ pub struct RestService {
 impl RestService {
     #[inline]
     /// Gets records or spesific record from db and returns as a result.
-    fn get(paths: &mut Vec<String>, response: Response) -> BoxFuture<Response, hyper::Error> {
-        let db = weld::DATABASE.lock().unwrap();
-        match db.read(paths) {
+    fn get(paths: Vec<String>, response: Response) -> BoxFuture<Response, hyper::Error> {
+        let mut db = weld::DATABASE.lock().unwrap();
+        match db.read(&mut paths.clone()) {
             Ok(record) => return utils::success(response, StatusCode::Ok, &record),
             Err(error) => {
                 match error {
@@ -34,14 +34,17 @@ impl RestService {
 
     #[inline]
     /// Creates the record. Returns the persisted version.
-    fn post(req: Request, table: String, response: Response) -> BoxFuture<Response, hyper::Error> {
+    fn post(req: Request,
+            paths: Vec<String>,
+            response: Response)
+            -> BoxFuture<Response, hyper::Error> {
         req.body()
             .concat()
             .and_then(move |body| {
                 let mut db = weld::DATABASE.lock().unwrap();
-                let mut payload: serde_json::Value =
-                    serde_json::from_slice(body.to_vec().as_slice()).unwrap();
-                match db.insert(table.as_str(), payload.as_object_mut().unwrap()) {
+                let payload: serde_json::Value = serde_json::from_slice(body.to_vec().as_slice())
+                    .unwrap();
+                match db.insert(&mut paths.clone(), payload) {
                     Ok(record) => {
                         db.flush();
                         return utils::success(response, StatusCode::Created, &record);
@@ -51,15 +54,12 @@ impl RestService {
                             NotFound(msg) => {
                                 utils::error(response, StatusCode::NotFound, msg.as_str())
                             }
+                            BadData(msg) => {
+                                utils::error(response, StatusCode::Conflict, msg.as_str())
+                            }
                             Duplicate(msg) => {
                                 utils::error(response, StatusCode::Conflict, msg.as_str())
                             }
-                            _ => {
-                                utils::error(response,
-                                             StatusCode::InternalServerError,
-                                             "Server Error")
-                            }
-
                         }
                     }
                 }
@@ -70,17 +70,16 @@ impl RestService {
     #[inline]
     /// Updates the record. Returns the persisted version.
     fn put(req: Request,
-           table: String,
-           id: i64,
+           paths: Vec<String>,
            response: Response)
            -> BoxFuture<Response, hyper::Error> {
         req.body()
             .concat()
             .and_then(move |body| {
                 let mut db = weld::DATABASE.lock().unwrap();
-                let mut payload: serde_json::Value =
-                    serde_json::from_slice(body.to_vec().as_slice()).unwrap();
-                match db.update(table.as_str(), &id, payload.as_object().unwrap().clone()) {
+                let payload: serde_json::Value = serde_json::from_slice(body.to_vec().as_slice())
+                    .unwrap();
+                match db.update(&mut paths.clone(), payload) {
                     Ok(record) => {
                         db.flush();
                         return utils::success(response, StatusCode::Ok, &record);
@@ -90,9 +89,7 @@ impl RestService {
                             NotFound(msg) => {
                                 utils::error(response, StatusCode::NotFound, msg.as_str())
                             }
-                            BadData(msg) => {
-                                utils::error(response, StatusCode::Conflict, msg.as_str())
-                            }
+
                             _ => {
                                 utils::error(response,
                                              StatusCode::InternalServerError,
@@ -107,9 +104,9 @@ impl RestService {
 
     #[inline]
     /// Deletes the record. Returns the data back.
-    fn delete(table: String, id: i64, response: Response) -> BoxFuture<Response, hyper::Error> {
+    fn delete(paths: Vec<String>, response: Response) -> BoxFuture<Response, hyper::Error> {
         let mut db = weld::DATABASE.lock().unwrap();
-        match db.delete(table.as_str(), &id) {
+        match db.delete(&mut paths.clone()) {
             Ok(record) => {
                 db.flush();
                 return utils::success(response, StatusCode::Ok, &record);
@@ -133,7 +130,7 @@ impl Service for RestService {
     type Future = BoxFuture<Response, hyper::Error>;
 
     fn call(&self, req: Request) -> Self::Future {
-        let mut path_parts = utils::split_path(req.path().to_string());
+        let path_parts = utils::split_path(req.path().to_string());
         let response = Response::new();
 
         match path_parts.len() {
@@ -146,19 +143,11 @@ impl Service for RestService {
             }  
             _ => {
                 // Record list or record
-                let table = path_parts.get(0).unwrap().clone();
-                let id = match utils::decide_id(path_parts.get(1)) {
-                    Ok(result) => result,
-                    Err(e) => {
-                        return utils::error(response, StatusCode::PreconditionFailed, e.as_str());
-                    }
-                };
-
                 match req.method() {
-                    &Get => Self::get(&mut path_parts, response),   
-                    &Post => Self::post(req, table, response),   
-                    &Put => Self::put(req, table, id, response),   
-                    &Delete => Self::delete(table, id, response),
+                    &Get => Self::get(path_parts, response),   
+                    &Post => Self::post(req, path_parts, response),   
+                    &Put => Self::put(req, path_parts, response),   
+                    &Delete => Self::delete(path_parts, response),
                     _ => utils::error(response, StatusCode::MethodNotAllowed, "Method Not Allowed"),
                 }
             }
