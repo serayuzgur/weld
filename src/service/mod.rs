@@ -20,7 +20,7 @@ impl RestService {
     #[inline]
     /// Gets records or spesific record from db and returns as a result.
     fn get(paths: &mut Vec<String>, response: Response) -> BoxFuture<Response, hyper::Error> {
-        let mut db = weld::DATABASE.lock().unwrap();
+        let db = weld::DATABASE.lock().unwrap();
         match db.read(paths) {
             Ok(record) => return utils::success(response, StatusCode::Ok, &record),
             Err(error) => {
@@ -74,14 +74,13 @@ impl RestService {
            id: i64,
            response: Response)
            -> BoxFuture<Response, hyper::Error> {
-        // TODO:: use path id when updating
         req.body()
             .concat()
             .and_then(move |body| {
                 let mut db = weld::DATABASE.lock().unwrap();
                 let mut payload: serde_json::Value =
                     serde_json::from_slice(body.to_vec().as_slice()).unwrap();
-                match db.update(table.as_str(), payload.as_object().unwrap().clone()) {
+                match db.update(table.as_str(), &id, payload.as_object().unwrap().clone()) {
                     Ok(record) => {
                         db.flush();
                         return utils::success(response, StatusCode::Ok, &record);

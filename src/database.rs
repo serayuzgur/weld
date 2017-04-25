@@ -191,7 +191,11 @@ impl Database {
     }
 
     /// Updates the record with the given id.
-    pub fn update(&mut self, key: &str, value: Map<String, Value>) -> Result<Value, Errors> {
+    pub fn update(&mut self,
+                  key: &str,
+                  id: &i64,
+                  value: Map<String, Value>)
+                  -> Result<Value, Errors> {
         let ref mut data = self.data;
         let db: &mut Map<String, Value> = data.as_object_mut()
             .expect("Database is invalid. You can't mock API with it. Terminating...");
@@ -199,57 +203,43 @@ impl Database {
             Some(en_map) => {
                 let array: &mut Vec<Value> = en_map.as_array_mut()
                     .expect("Table is invalid. For now it can only be Array<Map>. Terminating...");
-                match value.get("id") {
-                    Some(id_value) => {
-                        match id_value.as_i64() {
-                            Some(id) => {
-                                match Database::find_index(array, &id) {
-                                    None => {
-                                        Self::error(&self.logger,
-                                                    Errors::NotFound(format!("Update - Error  \
-                                                                              {:?}. No record \
-                                                                              with the given \
-                                                                              \"id\"",
-                                                                             id)))
-                                    }
-                                    Some(idx) => {
-                                        {
-                                            let old_value = array.get_mut(idx).unwrap();
-                                            let old_map = old_value.as_object_mut()
-                                                .unwrap();
-                                            for key in value.keys() {
-                                                old_map.insert(key.to_string(),
-                                                               value.get(key).unwrap().clone());
-                                            }
-                                        }
-                                        let new_value = array.get(idx).unwrap();
-                                        info!(&self.logger, "Updated - Ok id: {:?}", &id);
-                                        debug!(&self.logger, "Updated - Value  {}", &new_value);
-                                        return Ok(new_value.clone());
-                                    }
-                                }
-                            }
-                            None => {
-                                Self::error(&self.logger,
-                                            Errors::BadData(format!("Update - Error  {:?}. id \
-                                                                     column is not valid. Must \
-                                                                     be compatible with i64",
-                                                                    &value)))
-                            }
-                        }
-                    }
-                    None => {
+                match id {
+                    &-1i64 => {
                         Self::error(&self.logger,
                                     Errors::BadData(format!("Update - Error  {:?}. id column is \
                                                              not valid. Must be compatible with \
                                                              i64",
                                                             &value)))
                     }
-
+                    _ => {
+                        match Database::find_index(array, &id) {
+                            None => {
+                                Self::error(&self.logger,
+                                            Errors::NotFound(format!("Update - Error  {:?}. No \
+                                                                      record with the given \
+                                                                      \"id\"",
+                                                                     id)))
+                            }
+                            Some(idx) => {
+                                {
+                                    let old_value = array.get_mut(idx).unwrap();
+                                    let old_map = old_value.as_object_mut()
+                                        .unwrap();
+                                    for key in value.keys() {
+                                        old_map.insert(key.to_string(),
+                                                       value.get(key).unwrap().clone());
+                                    }
+                                }
+                                let new_value = array.get(idx).unwrap();
+                                info!(&self.logger, "Updated - Ok id: {:?}", &id);
+                                debug!(&self.logger, "Updated - Value  {}", &new_value);
+                                return Ok(new_value.clone());
+                            }
+                        }
+                    }
                 }
             }
             None => Err(Errors::NotFound(format!("Table not found {}", &key))),
-
         }
     }
 
