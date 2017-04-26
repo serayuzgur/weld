@@ -10,7 +10,6 @@ pub struct Server<'a> {
     logger: slog::Logger,
 }
 
-
 impl<'a> Server<'a> {
     pub fn new(config: &'a configuration::Server) -> Server<'a> {
         Server {

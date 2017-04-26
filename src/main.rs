@@ -28,22 +28,18 @@ mod configuration;
 mod database;
 mod weld;
 
-
 use server::Server;
 use configuration::Configuration;
 use std::env::args;
 
-
-
 fn main() {
     info!(weld::ROOT_LOGGER, "Application started";"started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
     let mut configuration = weld::CONFIGURATION.lock().unwrap();
-    match args().nth(1) {
-        Some(path) => configuration.load(path.as_str()),
-        None => {
-            info!(weld::ROOT_LOGGER, "Program arguments not found.");
-            configuration.load("weld.json");
-        }
+    if let Some(path) = args().nth(1) {
+        configuration.load(path.as_str())
+    } else {
+        info!(weld::ROOT_LOGGER, "Program arguments not found.");
+        configuration.load("weld.json");
     }
     load_db(&configuration);
     // Always call this at the end.

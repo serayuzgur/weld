@@ -60,7 +60,10 @@ impl Database {
                             Terminating...");
                 }
             }
-            Err(e) => panic!("Database - Error You can't mock API with it. Terminating... {}",e),
+            Err(e) => {
+                panic!("Database - Error You can't mock API with it. Terminating...{}",
+                       e)
+            }
 
         }
         let new_data: serde_json::Value = serde_json::from_str(&contents)
@@ -79,39 +82,29 @@ impl Database {
     pub fn get_object<'per_req>(keys: &mut Vec<String>,
                                 json_object: &'per_req mut Value)
                                 -> Result<&'per_req mut Value, Errors> {
-        if keys.len() == 0{
+        if keys.len() == 0 {
             return Ok(json_object);
         }
         let key = keys.remove(0);
         match json_object {
             &mut Array(ref mut array) => {
                 let id = Self::decide_id(&key);
-                match Database::find_index(&array, &id) {
-                    None => {
+                if let Some(idx) = Database::find_index(&array, &id) {
+                    if let Some(obj) = array.get_mut(idx) {
+                        return Self::call_if_nec(keys, key, obj);
+                    } else {
                         return Err(Errors::NotFound(format!("Read - Error  path: {:?} ", &key)));
                     }
-                    Some(idx) => {
-                        match array.get_mut(idx) {
-                            Some(obj) => {
-                                return Self::call_if_nec(keys, key, obj);
-                            }
-                            None => {
-                                return Err(Errors::NotFound(format!("Read - Error  \
-                                                                                 path: {:?} ",
-                                                                    &key)));
-                            }
-                        }
-                    }
+                } else {
+                    return Err(Errors::NotFound(format!("Read - Error  path: {:?} ", &key)));
                 }
             }
+
             &mut Object(ref mut obj) => {
-                match obj.get_mut(key.as_str()) {
-                    Some(obj) => return Self::call_if_nec(keys, key, obj),
-                    None => {
-                        return Err(Errors::NotFound(format!("Read - Error  path: \
-                                                                         {:?} ",
-                                                            &key)));
-                    }
+                if let Some(obj) = obj.get_mut(key.as_str()) {
+                    return Self::call_if_nec(keys, key, obj);
+                } else {
+                    return Err(Errors::NotFound(format!("Read - Error  path: {:?} ", &key)));
                 }
             }
             _ => {
@@ -173,7 +166,7 @@ impl Database {
         let map: &serde_json::Map<String, Value> = self.data
             .as_object()
             .expect("Database is invalid. You can't mock API with it. Terminating...");
-        let mut keys = vec![];
+        let mut keys = Vec::new();
         keys.extend(map.keys());
         keys
     }
