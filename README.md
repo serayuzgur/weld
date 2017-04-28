@@ -2,6 +2,8 @@
 Full fake REST API generator.
 
 [![Build Status](https://travis-ci.org/serayuzgur/weld.svg?branch=master)](https://travis-ci.org/serayuzgur/weld)
+[![codecov](https://codecov.io/gh/serayuzgur/weld/branch/master/graph/badge.svg)](https://codecov.io/gh/serayuzgur/weld)
+
 
 This project is heavily inspired by [json-server](https://github.com/typicode/json-server), written with rust. 
 
