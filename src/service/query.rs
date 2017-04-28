@@ -1,5 +1,6 @@
-use std::cmp::{PartialEq, Eq};
+use std::cmp::PartialEq;
 
+#[allow(dead_code)]
 /// Splits query params
 pub fn split_query(query: Option<&str>) -> Vec<Query> {
     match query {
@@ -15,7 +16,7 @@ pub fn split_query(query: Option<&str>) -> Vec<Query> {
                 }
                 let mut key = parts.get(0).unwrap().to_string();
                 let value = parts.get(1).unwrap().to_string();
-                let mut key_op = key.to_string();
+                let key_op = key.to_string();
                 let key_op_vec = key_op.split("_").filter(|x| !x.is_empty()).collect::<Vec<&str>>();
                 let op = match key_op_vec.get(1) {
                     Some(v) => {
@@ -45,6 +46,7 @@ pub struct Query {
     pub op: String,
 }
 impl Query {
+    #[allow(dead_code)]
     pub fn new(key: String, op: String, value: String) -> Query {
         Query {
             key: key,

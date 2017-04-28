@@ -9,7 +9,7 @@ use hyper;
 use futures::{Stream, Future, BoxFuture};
 use futures_cpupool::CpuPool;
 use serde_json::{from_slice, Value, to_value};
-use database::errors::Errors::{NotFound, BadData, Duplicate};
+use database::errors::Errors::{NotFound, Duplicate};
 
 pub struct RestService {
     pub logger: slog::Logger,
@@ -52,9 +52,6 @@ impl RestService {
                         match error {
                             NotFound(msg) => {
                                 utils::error(response, StatusCode::NotFound, msg.as_str())
-                            }
-                            BadData(msg) => {
-                                utils::error(response, StatusCode::Conflict, msg.as_str())
                             }
                             Duplicate(msg) => {
                                 utils::error(response, StatusCode::Conflict, msg.as_str())

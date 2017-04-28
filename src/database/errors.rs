@@ -3,5 +3,4 @@
 pub enum Errors {
     NotFound(String),
     Duplicate(String),
-    BadData(String),
 }
