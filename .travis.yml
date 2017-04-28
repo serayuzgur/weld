@@ -12,6 +12,7 @@ matrix:
 before_install:
   - sudo apt-get update
   - sudo apt-get install libelf-dev
+  - sudo apt-get install elfutils
 
 
 after_success: |

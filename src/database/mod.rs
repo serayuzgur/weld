@@ -37,6 +37,8 @@ impl Database {
             data: serde_json::Value::Null,
         }
     }
+
+    
     pub fn set_configuration(&mut self, configuration: &configuration::Database) {
         let path: String = configuration.path.clone();
         self.logger = ROOT_LOGGER.new(o!("database.path"=>path));
@@ -161,16 +163,6 @@ impl Database {
         }
     }
 
-    /// Get the list of the tables
-    pub fn tables(&self) -> Vec<&String> {
-        let map: &serde_json::Map<String, Value> = self.data
-            .as_object()
-            .expect("Database is invalid. You can't mock API with it. Terminating...");
-        let mut keys = Vec::new();
-        keys.extend(map.keys());
-        keys
-    }
-
     /// Find the index of the element with the given target id.
     fn find_index(vec: &Vec<Value>, target: &i64) -> Option<usize> {
         let mut index = 0;
@@ -186,10 +178,5 @@ impl Database {
             index += 1;
         }
         None
-    }
-
-    fn error(logger: &Logger, error: Errors) -> Result<Value, Errors> {
-        error!(logger, "{:?}", error);
-        return Err(error);
     }
 }

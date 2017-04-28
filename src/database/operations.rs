@@ -1,5 +1,6 @@
 use database::Database;
 use database::Errors;
+use database::errors::log_n_wrap;
 use database::Errors::{NotFound, Duplicate};
 use std::vec::Vec;
 use serde_json::Value;
@@ -7,6 +8,16 @@ use serde_json;
 use rand;
 
 impl Database {
+    /// Retuns the list of the tables ind the db json
+    pub fn tables(&self) -> Vec<&String> {
+        let map: &serde_json::Map<String, Value> = self.data
+            .as_object()
+            .expect("Database is invalid. You can't mock API with it. Terminating...");
+        let mut keys = Vec::new();
+        keys.extend(map.keys());
+        keys
+    }
+
     /// Reads the desired result with the given path.
     pub fn read(&mut self, keys: &mut Vec<String>) -> Result<Value, Errors> {
         let mut data = &mut self.data;
@@ -36,11 +47,11 @@ impl Database {
                 }
 
                 if let Some(idx) = Database::find_index(array, &id) {
-                    Self::error(&self.logger,
-                                Duplicate(format!("Insert - Error  {:?}. \"id\" \
-                                                           duplicates record at index: {:?}",
-                                                  &value_with_id,
-                                                  idx)))
+                    log_n_wrap(&self.logger,
+                               Duplicate(format!("Insert - Error  {:?}. \"id\" duplicates \
+                                                  record at index: {:?}",
+                                                 &value_with_id,
+                                                 idx)))
                 } else {
                     array.push(value_with_id.clone());
                     info!(&self.logger, "Insert - Ok id: {:?}", &id);
@@ -48,16 +59,15 @@ impl Database {
                     Ok(value_with_id.clone())
                 }
             } else {
-                Self::error(&self.logger,
-                            Duplicate(format!("Insert - Error already has an object \
-                                                       with the given key: {:?}",
-                                              keys)))
+                log_n_wrap(&self.logger,
+                           Duplicate(format!("Insert - Error already has an object with the \
+                                              given key: {:?}",
+                                             keys)))
             }
         } else {
-            Self::error(&self.logger,
-                        NotFound(format!("Insert - Error  {:?}. No record with the \
-                                                  given path:",
-                                         keys)))
+            log_n_wrap(&self.logger,
+                       NotFound(format!("Insert - Error  {:?}. No record with the given path:",
+                                        keys)))
         }
     }
 
@@ -94,19 +104,17 @@ impl Database {
                     }
                 }
                 _ => {
-                    return Self::error(&self.logger,
-                                       Duplicate(format!("Update - Error already has \
-                                                                  an object with the given \
-                                                                  key: {:?}",
-                                                         keys)));
+                    return log_n_wrap(&self.logger,
+                                      Duplicate(format!("Update - Error already has an object \
+                                                         with the given key: {:?}",
+                                                        keys)));
                 }
             }
             return Ok(obj.clone());
         } else {
-            Self::error(&self.logger,
-                        NotFound(format!("Update - Error  {:?}. No record with the \
-                                                  given path:",
-                                         keys)))
+            log_n_wrap(&self.logger,
+                       NotFound(format!("Update - Error  {:?}. No record with the given path:",
+                                        keys)))
         }
     }
 
@@ -122,7 +130,7 @@ impl Database {
                     if let Some(deleted) = map.remove(key) {
                         Ok(deleted.clone())
                     } else {
-                        Self::error(&self.logger, NotFound(format!("Table not found {}", &key)))
+                        log_n_wrap(&self.logger, NotFound(format!("Table not found {}", &key)))
                     }
                 }
                 &mut Value::Array(ref mut array) => {
@@ -133,18 +141,18 @@ impl Database {
                         debug!(&self.logger, "Delete - Value {}", &value);
                         Ok(value.clone())
                     } else {
-                        Self::error(&self.logger,
-                                    NotFound(format!("Delete - Error  id: {:?}", &id)))
+                        log_n_wrap(&self.logger,
+                                   NotFound(format!("Delete - Error  id: {:?}", &id)))
                     }
                 }
                 _ => {
-                    Self::error(&self.logger,
-                                NotFound(format!("Delete - Error  path: {:?}", &key)))
+                    log_n_wrap(&self.logger,
+                               NotFound(format!("Delete - Error  path: {:?}", &key)))
                 }
             }
         } else {
-            Self::error(&self.logger,
-                        NotFound(format!("Delete - Error  path: {:?}", &key)))
+            log_n_wrap(&self.logger,
+                       NotFound(format!("Delete - Error  path: {:?}", &key)))
         }
     }
 }

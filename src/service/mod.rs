@@ -1,15 +1,19 @@
 pub mod utils;
 pub mod query;
 
+use std;
 use weld;
 use slog;
 use hyper::{Get, Post, Put, Delete, StatusCode};
 use hyper::server::{Service, Request, Response};
 use hyper;
+use hyper::Body;
+
 use futures::{Stream, Future, BoxFuture};
 use futures_cpupool::CpuPool;
 use serde_json::{from_slice, Value, to_value};
 use database::errors::Errors::{NotFound, Duplicate};
+use futures::IntoFuture;
 
 pub struct RestService {
     pub logger: slog::Logger,
@@ -17,6 +21,7 @@ pub struct RestService {
 }
 
 impl RestService {
+
     #[inline]
     /// Gets records or spesific record from db and returns as a result.
     fn get(paths: Vec<String>, response: Response) -> BoxFuture<Response, hyper::Error> {
