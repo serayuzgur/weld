@@ -11,6 +11,8 @@ matrix:
 
 before_install:
   - sudo apt-get update
+  - sudo apt-get install libelf-dev
+
 
 after_success: |
   wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
