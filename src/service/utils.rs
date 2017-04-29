@@ -33,7 +33,6 @@ pub fn split_path(path: String) -> Vec<String> {
     path.split("/").filter(|x| !x.is_empty()).map(String::from).collect::<Vec<String>>()
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -22,37 +22,35 @@ use self::errors::Errors;
 #[derive(Debug)]
 pub struct Database {
     logger: Logger,
-    configuration: configuration::Database,
+    configuration: Option<configuration::Database>,
     data: serde_json::Value,
 }
 
 
 impl Database {
     /// Creates an instance of the Database.
-    pub fn new(configuration: &configuration::Database) -> Database {
-        let path: String = configuration.path.clone();
+    pub fn new() -> Database {
         Database {
-            logger: ROOT_LOGGER.new(o!("database.path"=>path)),
-            configuration: configuration.clone(),
+            logger: ROOT_LOGGER.new(o!()),
+            configuration: None,
             data: serde_json::Value::Null,
         }
     }
 
-    
-    pub fn set_configuration(&mut self, configuration: &configuration::Database) {
-        let path: String = configuration.path.clone();
-        self.logger = ROOT_LOGGER.new(o!("database.path"=>path));
-        self.configuration = configuration.clone();
-        self.data = serde_json::Value::Null;
+
+    pub fn load(&mut self, configuration: &configuration::Database) {
+        self.configuration = Some(configuration.clone());
+        self.open();
     }
     /// Parses the file and loads in to the memory.
     /// You have to call this before doing any set of operations.
     /// All failed operations results with panic because there is no meaning to continue without a proper db.
     pub fn open(&mut self) {
+        let path =  self.configuration.clone().unwrap().path;
         info!(self.logger,
               "Database - Connecting : {:?}",
-              self.configuration.path);
-        let mut file = File::open(&self.configuration.path)
+              path);
+        let mut file = File::open(&path)
             .expect("Database - Error Can't read. Terminating...");
         let mut contents = String::new();
         match file.read_to_string(&mut contents) {
@@ -71,7 +69,7 @@ impl Database {
         let new_data: serde_json::Value = serde_json::from_str(&contents)
             .expect("Invalid JSON format. Check provided db. Terminating...");
         self.data = new_data;
-        info!(self.logger, "Database - Ok : {:?}", self.configuration.path);
+        info!(self.logger, "Database - Ok : {:?}", path);
     }
 
     pub fn decide_id(val: &String) -> i64 {
@@ -134,7 +132,7 @@ impl Database {
         let mut file = OpenOptions::new()
             .read(true)
             .write(true)
-            .open(&self.configuration.path)
+            .open(&self.configuration.clone().unwrap().path)
             .unwrap();
         match file.set_len(0) {
             Ok(_) => {

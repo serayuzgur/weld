@@ -4,6 +4,7 @@
         "port": 8080
     },
     "database": {
-        "path": "db.json"
+        "path": "db.json",
+        "default_pk":"id"
     }
 }
