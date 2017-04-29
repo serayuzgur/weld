@@ -41,11 +41,10 @@ impl Database {
                     }
                 }
                 let value_with_id = &mut value.clone();
-
                 if let Some(obj_id) = value_with_id.as_object_mut() {
                     obj_id.insert("id".to_string(), serde_json::to_value(id).unwrap());
                 }
-
+                //TODO: random id conflict must be resolved.
                 if let Some(idx) = Database::find_index(array, &id) {
                     log_n_wrap(&self.logger,
                                Duplicate(format!("Insert - Error  {:?}. \"id\" duplicates \
@@ -104,6 +103,7 @@ impl Database {
                     }
                 }
                 _ => {
+                    //TODO:: Check error message for the case
                     return log_n_wrap(&self.logger,
                                       Duplicate(format!("Update - Error already has an object \
                                                          with the given key: {:?}",

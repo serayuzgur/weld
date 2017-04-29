@@ -1,19 +1,16 @@
 pub mod utils;
 pub mod query;
 
-use std;
 use weld;
 use slog;
 use hyper::{Get, Post, Put, Delete, StatusCode};
 use hyper::server::{Service, Request, Response};
 use hyper;
-use hyper::Body;
 
 use futures::{Stream, Future, BoxFuture};
 use futures_cpupool::CpuPool;
 use serde_json::{from_slice, Value, to_value};
 use database::errors::Errors::{NotFound, Duplicate};
-use futures::IntoFuture;
 
 pub struct RestService {
     pub logger: slog::Logger,
@@ -47,6 +44,7 @@ impl RestService {
             .concat()
             .and_then(move |body| {
                 let mut db = weld::DATABASE.lock().unwrap();
+                //TODO: Handle bad data
                 let payload: Value = from_slice(body.to_vec().as_slice()).unwrap();
                 match db.insert(&mut paths.clone(), payload) {
                     Ok(record) => {

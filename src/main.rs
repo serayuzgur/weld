@@ -33,7 +33,7 @@ use std::env::args;
 
 fn main() {
     info!(weld::ROOT_LOGGER, "Application started";"started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
-    let mut configuration = weld::CONFIGURATION.lock().unwrap();
+    let mut configuration = weld::CONFIGURATION.lock().expect("Configuration is not accesible");
     if let Some(path) = args().nth(1) {
         configuration.load(path.as_str())
     } else {
