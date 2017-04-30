@@ -1,3 +1,6 @@
+//! # utils
+//! Holds utility functions in order to help service layer.
+
 use hyper::StatusCode;
 use hyper::server::Response;
 use hyper;

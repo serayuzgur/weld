@@ -1,8 +1,11 @@
+//! # query
+//! This module includes necessary structs and functions to parse query patameters in a spesific way. 
+//! For filtering data.
 use std::cmp::PartialEq;
 
 #[allow(dead_code)]
-/// Splits query params
-pub fn split_query(query: Option<&str>) -> Vec<Query> {
+/// parse query params ad
+pub fn parse_query(query: Option<&str>) -> Vec<Query> {
     match query {
         Some(params) => {
             let mut queries = Vec::<Query>::new();
@@ -38,14 +41,19 @@ pub fn split_query(query: Option<&str>) -> Vec<Query> {
     }
 }
 
+/// A simple struct to hold necessary information about a query parameter.
 #[derive(Eq)]
 #[derive(Debug)]
 pub struct Query {
+    /// key of the parameter. It holds pure key without any `_eq` etc. 
     pub key: String,
+    /// value of the parameter.
     pub value: String,
+    /// operation of the parameter. =, eq,neq,gtw,let,like
     pub op: String,
 }
 impl Query {
+    /// 
     #[allow(dead_code)]
     pub fn new(key: String, op: String, value: String) -> Query {
         Query {
@@ -66,26 +74,26 @@ impl PartialEq for Query {
 mod tests {
     use super::*;
     #[test]
-    fn split_query_test() {
-        assert_eq!(split_query(None), Vec::<Query>::new());
-        assert_eq!(split_query(Some("")), Vec::<Query>::new());
-        assert_eq!(split_query(Some("&&")), Vec::<Query>::new());
-        assert_eq!(split_query(Some("a=1&b=2&c=3")),
+    fn parse_query_test() {
+        assert_eq!(parse_query(None), Vec::<Query>::new());
+        assert_eq!(parse_query(Some("")), Vec::<Query>::new());
+        assert_eq!(parse_query(Some("&&")), Vec::<Query>::new());
+        assert_eq!(parse_query(Some("a=1&b=2&c=3")),
                    vec![Query::new("a".to_string(), "=".to_string(), "1".to_string()),
                         Query::new("b".to_string(), "=".to_string(), "2".to_string()),
                         Query::new("c".to_string(), "=".to_string(), "3".to_string())]);
 
-        assert_eq!(split_query(Some("_start=20&_end=30")),
+        assert_eq!(parse_query(Some("_start=20&_end=30")),
                    vec![Query::new("_start".to_string(), "=".to_string(), "20".to_string()),
                         Query::new("_end".to_string(), "=".to_string(), "30".to_string())]);
-        assert_eq!(split_query(Some("views_gte=10&views_lte=20")),
+        assert_eq!(parse_query(Some("views_gte=10&views_lte=20")),
                    vec![Query::new("views".to_string(), "gte".to_string(), "10".to_string()),
                         Query::new("views".to_string(), "lte".to_string(), "20".to_string())]);
-        assert_eq!(split_query(Some("id_ne=1")),
+        assert_eq!(parse_query(Some("id_ne=1")),
                    vec![Query::new("id".to_string(), "ne".to_string(), "1".to_string())]);
-        assert_eq!(split_query(Some("title_like=server")),
+        assert_eq!(parse_query(Some("title_like=server")),
                    vec![Query::new("title".to_string(), "like".to_string(), "server".to_string())]);
-        assert_eq!(split_query(Some("q=internet")),
+        assert_eq!(parse_query(Some("q=internet")),
                    vec![Query::new("q".to_string(), "=".to_string(), "internet".to_string())]);
 
                         

@@ -1,7 +1,14 @@
-extern crate serde_json;
-mod operations;
+//! # database
+//! This module holds necessary structs and functions to accomplish database tasks.
+
+mod read;
+mod insert;
+mod update;
+mod delete;
+
 pub mod errors;
 
+use serde_json;
 use slog::Logger;
 use configuration;
 use weld::ROOT_LOGGER;
@@ -37,7 +44,7 @@ impl Database {
         }
     }
 
-
+    /// Loads the database according to the given configuration.
     pub fn load(&mut self, configuration: &configuration::Database) {
         self.configuration = Some(configuration.clone());
         self.open();
@@ -46,12 +53,9 @@ impl Database {
     /// You have to call this before doing any set of operations.
     /// All failed operations results with panic because there is no meaning to continue without a proper db.
     pub fn open(&mut self) {
-        let path =  self.configuration.clone().unwrap().path;
-        info!(self.logger,
-              "Database - Connecting : {:?}",
-              path);
-        let mut file = File::open(&path)
-            .expect("Database - Error Can't read. Terminating...");
+        let path = self.configuration.clone().unwrap().path;
+        info!(self.logger, "Database - Connecting : {:?}", path);
+        let mut file = File::open(&path).expect("Database - Error Can't read. Terminating...");
         let mut contents = String::new();
         match file.read_to_string(&mut contents) {
             Ok(usize) => {
@@ -72,6 +76,7 @@ impl Database {
         info!(self.logger, "Database - Ok : {:?}", path);
     }
 
+    /// A simple function to parse id or return -1.
     pub fn decide_id(val: &String) -> i64 {
         match i64::from_str_radix(val.as_str(), 10) {
             Ok(parsed) => parsed,
@@ -79,6 +84,9 @@ impl Database {
         }
     }
 
+    /// This is the main access function to reach the desired data from the whole database.
+    /// Tries to find the keys provided in the database recursively. 
+    /// Returns mutable references to allow manipulation.
     pub fn get_object<'per_req>(keys: &mut Vec<String>,
                                 json_object: &'per_req mut Value)
                                 -> Result<&'per_req mut Value, Errors> {
@@ -91,7 +99,7 @@ impl Database {
                 let id = Self::decide_id(&key);
                 if let Some(idx) = Database::find_index(&array, &id) {
                     if let Some(obj) = array.get_mut(idx) {
-                        return Self::call_if_nec(keys, key, obj);
+                        return Self::get_object(keys, obj);
                     } else {
                         return Err(Errors::NotFound(format!("Read - Error  path: {:?} ", &key)));
                     }
@@ -99,10 +107,9 @@ impl Database {
                     return Err(Errors::NotFound(format!("Read - Error  path: {:?} ", &key)));
                 }
             }
-
             &mut Object(ref mut obj) => {
                 if let Some(obj) = obj.get_mut(key.as_str()) {
-                    return Self::call_if_nec(keys, key, obj);
+                    return Self::get_object(keys, obj);
                 } else {
                     return Err(Errors::NotFound(format!("Read - Error  path: {:?} ", &key)));
                 }
@@ -111,17 +118,6 @@ impl Database {
                 return Err(Errors::NotFound(format!("Read - Error  path: {:?} ", &key)));
             }
         };
-    }
-    pub fn call_if_nec<'per_req>(keys: &mut Vec<String>,
-                                 key: String,
-                                 value: &'per_req mut Value)
-                                 -> Result<&'per_req mut Value, Errors> {
-        if keys.len() == 0 {
-            keys.push(key);
-            return Ok(value);
-        } else {
-            return Self::get_object(keys, value);
-        }
     }
 
     /// Flush all the changes to the file.
