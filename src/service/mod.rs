@@ -2,7 +2,7 @@
 //! This is the service layer of the application.
 //! All requests taken by the server will be consumed by the services under this module.
 pub mod utils;
-pub mod query;
+pub mod query_api;
 
 use weld;
 use slog;
@@ -14,6 +14,8 @@ use futures::{Stream, Future, BoxFuture};
 use futures_cpupool::CpuPool;
 use serde_json::{from_slice, Value, to_value};
 use database::errors::Errors::{NotFound, Conflict};
+
+use self::query_api::Queries;
 
 /// A Simple struct to represent rest service.
 pub struct RestService {
@@ -29,9 +31,12 @@ impl RestService {
     /// To reach service Http Method must be GET.
     /// It works in acceptor thread. Since it is fast for small databases it is ok to work like this.
     /// Later all services must be handled under a new thread.
-    fn get(paths: Vec<String>, response: Response) -> BoxFuture<Response, hyper::Error> {
+    fn get(paths: Vec<String>,
+           queries: Option<Queries>,
+           response: Response)
+           -> BoxFuture<Response, hyper::Error> {
         let mut db = weld::DATABASE.lock().unwrap();
-        match db.read(&mut paths.clone()) {
+        match db.read(&mut paths.clone(), queries) {
             Ok(record) => return utils::success(response, StatusCode::Ok, &record),
             Err(error) => {
                 match error {
@@ -130,27 +135,31 @@ impl RestService {
 
 /// Service implementation for the RestService. It is required by tokio to make it work with our service.
 impl Service for RestService {
-    ///Type of the request
+    /// Type of the request
     type Request = Request;
-    ///Type of the response
+    /// Type of the response
     type Response = Response;
-    ///Type of the error
+    /// Type of the error
     type Error = hyper::Error;
-    ///Type of the future
+    /// Type of the future
     type Future = BoxFuture<Response, hyper::Error>;
 
-    ///Entry point of the service. Pases path nad method and redirect to the correct function.
+    /// Entry point of the service. Pases path nad method and redirect to the correct function.
     fn call(&self, req: Request) -> Self::Future {
         let path_parts = utils::split_path(req.path().to_string());
         let response = Response::new();
         // Table list
         if let 0 = path_parts.len() {
+            // TODO: return as homepage with links
             let db = weld::DATABASE.lock().unwrap();
             utils::success(response, StatusCode::Ok, &to_value(&db.tables()).unwrap())
         } else {
             // Record list or record
             match req.method() {
-                &Get => Self::get(path_parts, response),   
+                &Get => {
+                    let queries = query_api::parse(req.query());
+                    Self::get(path_parts, queries, response)
+                }
                 &Post => Self::post(req, path_parts, response),   
                 &Put => Self::put(req, path_parts, response),   
                 &Delete => Self::delete(path_parts, response),
