@@ -113,7 +113,7 @@ Database is a simple json file.
 }
 ```
 
-Here the `comments` and `posts` are tables. They hold an array of the records. They can be empty arrays but they must exist as is.
+Here the `owner` and `posts` are tables. They can be empty arrays/objects but they must exist as is.
 
 **NOTE :** `id`: Column is a must, all parsing uses it.
 
@@ -327,6 +327,10 @@ response:
     "name": "tech"
 }
 ```
+
+#### Query API
+##### Field selectionGive the API consumer the ability to choose returned fields. This will also reduce the network traffic and speed up the usage of the API.```GET /cars?fields=manufacturer,model,id,color```##### Paging```GET /cars?_offset=10&_limit=5```
+* Add  _offset and _limit (an X-Total-Count header is included in the response).* To send the total entries back to the user use the custom HTTP header: X-Total-Count.* Content-Range offset – limit / count.	* offset: Index of the first element returned by the request.	* limit: Index of the last element returned by the request.	* count: Total number of elements in the collection.* Accept-Range resource max.* resource: The type of pagination. Must remind of the resource in use, e.g: client, order, restaurant, …* max 	  : Maximum number of elements that can be returned in a single request.##### Sorting* Allow ascending and descending sorting over multiple fields.* Use sort with underscore as `_sort`.* In code, descending describe as ` - `, ascending describe as ` + `.```GET /cars?_sort=-manufactorer,+model```##### Operators* Add `_filter` query parameter and continue with field names,operations and values separated by `,`.* Pattern `_filter=<fieldname><operation><value>`.* Supported operations.	* `=` equal	* `!=` not equal	* `<` less	* `<=` less or equals	* `>` greater	* `>=` greater or equals	* `~=` like	* `|=` in (values must be separated with `|`	```GET http://127.0.0.1:8080/robe/users?_filter=name=seray,active=true```##### Full-text search* Add `_q`.```GET /cars?_q=nissan```
 
 ## License
 
