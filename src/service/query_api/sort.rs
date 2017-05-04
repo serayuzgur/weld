@@ -65,5 +65,8 @@ mod tests {
         assert_eq!(parse("name"), None);
         assert_eq!(parse("name+"), Some(Sort::ASC("name".to_string())));
         assert_eq!(parse("name-"), Some(Sort::DSC("name".to_string())));
+
+        assert_ne!(parse("name+"), Some(Sort::DSC("name".to_string())));
+        assert_ne!(parse("name-"), Some(Sort::ASC("name".to_string())));
     }
 }

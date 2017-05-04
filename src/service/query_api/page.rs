@@ -61,5 +61,10 @@ mod tests {
                    Some(Page::OFFSET(123)));
         assert_eq!(parse(Query::new("_limit", "=", "123")),
                    Some(Page::LIMIT(123)));
+        
+        assert_ne!(parse(Query::new("_offset", "=", "123")),
+                   Some(Page::LIMIT(123)));
+        assert_ne!(parse(Query::new("_offset", "=", "123")),
+                   Some(Page::LIMIT(123)));
     }
 }

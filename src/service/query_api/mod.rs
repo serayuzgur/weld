@@ -17,7 +17,7 @@ pub fn parse(query: Option<&str>) -> Option<Queries> {
                     continue;
                 }
                 // wellcome, now we can start the real parsing
-                let parts = param.splitn(2,"=").collect::<Vec<&str>>();
+                let parts = param.splitn(2, "=").collect::<Vec<&str>>();
                 if parts.get(0).is_none() || parts.get(1).is_none() {
                     continue;
                 }
@@ -62,7 +62,7 @@ fn set_where_it_belongs(queries: &mut Queries, q: Query) {
         }
         "_filter" => {
             let mut filter_vet = &mut queries.filter;
-            println!("parsing {}",q.value);
+            println!("parsing {}", q.value);
             filter_vet.extend(q.value.split(",").map(Query::from).collect::<Vec<Query>>());
         }
         "_q" => {
@@ -118,6 +118,10 @@ impl PartialEq for Queries {
 mod tests {
     use super::*;
     #[test]
+    fn parse_none_test() {
+        assert_eq!(parse(None), None);
+    }
+    #[test]
     fn parse_fields_test() {
         let mut queries = Queries::new();
         {
@@ -146,8 +150,9 @@ mod tests {
             let sort = &mut queries.sort;
             sort.push(Sort::ASC("a".to_string()));
             sort.push(Sort::DSC("b".to_string()));
+            sort.push(Sort::ASC("c".to_string()));
         }
-        assert_eq!(parse(Some("_sort=a+,b-")), Some(queries));
+        assert_eq!(parse(Some("_sort=a+,b-,c")), Some(queries));
     }
 
     #[test]
@@ -161,7 +166,7 @@ mod tests {
         assert_eq!(parse(Some("_filter=name=seray,active=true")), Some(queries));
     }
 
-      #[test]
+    #[test]
     fn parse_q_test() {
         let mut queries = Queries::new();
         {
