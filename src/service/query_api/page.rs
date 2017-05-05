@@ -2,7 +2,7 @@
 //! All paging related codes contained under this module.
 use service::query_api::query::Query;
 /// An enum to hold sort parameters with the direction.
-#[derive(Debug)]
+#[derive(Debug,Copy,Clone)]
 pub enum Page {
     /// Ascending sorting.
     OFFSET(u8),

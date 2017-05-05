@@ -5,6 +5,7 @@ mod read;
 mod insert;
 mod update;
 mod delete;
+pub mod query_api;
 
 pub mod errors;
 
@@ -85,7 +86,7 @@ impl Database {
     }
 
     /// This is the main access function to reach the desired data from the whole database.
-    /// Tries to find the keys provided in the database recursively. 
+    /// Tries to find the keys provided in the database recursively.
     /// Returns mutable references to allow manipulation.
     pub fn get_object<'per_req>(keys: &mut Vec<String>,
                                 json_object: &'per_req mut Value)

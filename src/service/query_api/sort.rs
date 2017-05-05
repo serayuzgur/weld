@@ -3,7 +3,7 @@
 use std::cmp::PartialEq;
 
 /// An enum to hold sort parameters with the direction.
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub enum Sort {
     /// Ascending sorting.
     ASC(String),

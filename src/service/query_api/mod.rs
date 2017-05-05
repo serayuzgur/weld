@@ -75,7 +75,7 @@ fn set_where_it_belongs(queries: &mut Queries, q: Query) {
 }
 
 /// A simple struct to hold query parameters well structured.
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct Queries {
     /// field names to return
     pub fields: Vec<String>,

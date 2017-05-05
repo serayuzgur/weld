@@ -3,8 +3,7 @@
 use std::cmp::PartialEq;
 
 /// A simple struct to hold necessary information about a query parameter.
-#[derive(Eq)]
-#[derive(Debug)]
+#[derive(Debug,Clone,Eq)]
 pub struct Query {
     /// key of the parameter. It holds pure key without any `_eq` etc.
     pub key: String,
