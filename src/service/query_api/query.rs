@@ -32,12 +32,9 @@ impl PartialEq for Query {
 
 impl<'a> From<&'a str> for Query {
     fn from(s: &'a str) -> Query {
-        println!("query");
         if let Some(query) = parse(s) {
-            println!("query parsed!");
             return query;
         } else {
-            println!("query failed!");
             return Query::new("", "", "");
         }
     }

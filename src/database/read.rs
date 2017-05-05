@@ -28,10 +28,13 @@ impl Database {
             Ok(obj) => {
                 println!("{:?}", queries);
                 if let Some(q) = queries {
-                    query_api::filter::apply(obj, &q);
-                    query_api::q::apply(obj, &q);
+                    let clone = &mut obj.clone();
+                    query_api::filter::apply(clone, &q);
+                    query_api::q::apply(clone, &q);
+                    return Ok(clone.clone());
                 }
-                Ok(obj.clone())
+                return Ok(obj.clone());
+
             }
             Err(ref msg) => Err(msg.clone()),
         }
