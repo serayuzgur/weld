@@ -29,6 +29,7 @@ impl Database {
                 println!("{:?}", queries);
                 if let Some(q) = queries {
                     query_api::filter::apply(obj, &q);
+                    query_api::q::apply(obj, &q);
                 }
                 Ok(obj.clone())
             }

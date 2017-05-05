@@ -6,7 +6,7 @@ use serde_json::error::ErrorCode::Message;
 use service::query_api::Queries;
 
 /// filter array according to the query api
-pub fn apply(obj: &mut Value, queries: &Queries) -> Value {
+pub fn apply(obj: &mut Value, queries: &Queries) {
     let ref filters = queries.filter;
     if let &mut Value::Array(ref mut arr) = obj {
         let mut size = arr.len();
@@ -33,7 +33,6 @@ pub fn apply(obj: &mut Value, queries: &Queries) -> Value {
             }
         }
     } else {}
-    obj.clone()
 }
 
 fn convert_2_same_type(field_value: &Value, query_value: &str) -> Result<Value, Error> {
@@ -97,7 +96,7 @@ fn is_valid(op: &str, field_value: &Value, query_value: &str) -> bool {
                     valid = false;
                     if let Ok(qval) = convert_2_same_type(field_value, part) {
                         println!("checking {:?}|={:?}", field_value, &qval);
-                        if field_value == &qval{
+                        if field_value == &qval {
                             valid = true;
                             break;
                         }
@@ -158,7 +157,9 @@ mod tests {
                 "password":"123"
             }]"#)
             .unwrap();
-        assert_eq!(apply(&mut get_json(), &queries), expected);
+        let json = &mut get_json();
+        apply(json, &queries);
+        assert_eq!(json.clone(), expected);
     }
     #[test]
     fn apply_ne_test() {
@@ -176,7 +177,9 @@ mod tests {
                 "password":"333"
             }]"#)
             .unwrap();
-        assert_eq!(apply(&mut get_json(), &queries), expected);
+        let json = &mut get_json();
+        apply(json, &queries);
+        assert_eq!(json.clone(), expected);
     }
 
     #[test]
@@ -195,7 +198,9 @@ mod tests {
                 "password":"123"
             }]"#)
             .unwrap();
-        assert_eq!(apply(&mut get_json(), &queries), expected);
+        let json = &mut get_json();
+        apply(json, &queries);
+        assert_eq!(json.clone(), expected);
     }
     #[test]
     fn apply_gte_lte_test() {
@@ -213,7 +218,9 @@ mod tests {
                 "password":"123"
             }]"#)
             .unwrap();
-        assert_eq!(apply(&mut get_json(), &queries), expected);
+        let json = &mut get_json();
+        apply(json, &queries);
+        assert_eq!(json.clone(), expected);
     }
     #[test]
     fn apply_like_test() {
@@ -237,7 +244,9 @@ mod tests {
             }
             ]"#)
             .unwrap();
-        assert_eq!(apply(&mut get_json(), &queries), expected);
+        let json = &mut get_json();
+        apply(json, &queries);
+        assert_eq!(json.clone(), expected);
     }
 
     #[test]
@@ -262,6 +271,8 @@ mod tests {
             }
             ]"#)
             .unwrap();
-        assert_eq!(apply(&mut get_json(), &queries), expected);
+        let json = &mut get_json();
+        apply(json, &queries);
+        assert_eq!(json.clone(), expected);
     }
 }
