@@ -1,13 +1,9 @@
 //! # query_api
 //! All necessery functions for appliying query api to json results.
-use database::Database;
-use database::Errors;
-use std::vec::Vec;
 use serde_json::{Value, Error};
 use serde_json;
 use serde_json::error::ErrorCode::Message;
 use service::query_api::Queries;
-use database::query_api;
 
 /// filter array according to the query api
 pub fn apply(obj: &mut Value, queries: &Queries) -> Value {
