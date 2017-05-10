@@ -31,10 +31,10 @@ impl Database {
                     query_api::filter::apply(clone, &q);
                     query_api::q::apply(clone, &q);
                     query_api::sort::apply(clone, &q);
+                    query_api::fields::apply(clone, &q);
                     return Ok(clone.clone());
                 }
                 return Ok(obj.clone());
-
             }
             Err(ref msg) => Err(msg.clone()),
         }
