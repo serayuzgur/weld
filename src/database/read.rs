@@ -23,7 +23,6 @@ impl Database {
                 queries: Option<Queries>)
                 -> Result<Value, Errors> {
         let mut data = &mut self.data;
-        // TODO: If path is db return db
         match Self::get_object(keys, data) {
             Ok(obj) => {
                 println!("{:?}", queries);

@@ -1,5 +1,5 @@
-//! # query_api
-//! All necessery functions for appliying query api to json results.
+//! # q
+//! All necessery functions for appliying full-text search to json results.
 use serde_json::Value;
 use service::query_api::Queries;
 
@@ -18,7 +18,6 @@ pub fn apply(obj: &mut Value, queries: &Queries) {
                             for key in map.keys() {
                                 if let Some(field) = item.get(key) {
                                     if let &Value::String(ref f_str) = field {
-                                        println!("Checking - {}.contains({})", f_str, q);
                                         valid = f_str.contains(q);
                                         if valid {
                                             break;

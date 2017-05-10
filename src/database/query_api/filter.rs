@@ -1,5 +1,5 @@
-//! # query_api
-//! All necessery functions for appliying query api to json results.
+//! # filter
+//! All necessery functions for appliying filtering to json results.
 use serde_json::{Value, Error};
 use serde_json;
 use serde_json::error::ErrorCode::Message;
