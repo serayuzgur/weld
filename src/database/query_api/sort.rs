@@ -71,6 +71,9 @@ fn compare(a: &Map<String, Value>, b: &Map<String, Value>, sort_key: &String) ->
 
 /// sort on all desired fields fields according to the query api
 pub fn apply(obj: &mut Value, queries: &Queries) {
+    if queries.sort.len() == 0 {
+        return;
+    }
     if let &mut Value::Array(ref mut arr) = obj {
         let ref sorts = queries.sort;
         arr.sort_by(|a: &Value, b: &Value| {

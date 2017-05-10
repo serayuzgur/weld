@@ -30,6 +30,7 @@ impl Database {
                     let clone = &mut obj.clone();
                     query_api::filter::apply(clone, &q);
                     query_api::q::apply(clone, &q);
+                    query_api::sort::apply(clone, &q);
                     return Ok(clone.clone());
                 }
                 return Ok(obj.clone());
