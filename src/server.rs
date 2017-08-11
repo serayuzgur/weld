@@ -10,7 +10,7 @@ use futures_cpupool::CpuPool;
 
 /// Holds server configuration and logger
 pub struct Server<'a> {
-    //7Configuration of the server for future access.
+    //Configuration of the server for future access.
     configuration: &'a configuration::Server,
     //Logger for the server. All services should create loggers from this.
     logger: slog::Logger,

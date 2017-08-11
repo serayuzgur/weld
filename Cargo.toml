@@ -17,20 +17,20 @@ exclude       = [
 
 [dependencies]
 # Serde for JSON
-serde="0.9.13"
-serde_derive="0.9.13"
-serde_json="0.9.10"
+serde="1.0.11"
+serde_derive="1.0.11"
+serde_json="1.0.2"
 
-bytes = "0.4.2"
-futures = "0.1.13"
-hyper = { version= "0.11.0-a.0", git = "https://github.com/hyperium/hyper" }
+bytes = "0.4.4"
+futures = "0.1.14"
+hyper = "0.11.2"
 futures-cpupool = "0.1.5"
-rand = "0.3.15"
+rand = "0.3.16"
 
 # Logger
-slog= "2.0.*"
-slog-term= { version= "2.0.0-4.0", git = "https://github.com/slog-rs/term" }
-slog-async= { version= "2.0.*", git = "https://github.com/slog-rs/async" }
+slog= "2.0.6"
+slog-term= "2.1.0"
+slog-async= "2.1.0"
 
-time="0.1.36"
+time="0.1.38"
 lazy_static="0.2.8"

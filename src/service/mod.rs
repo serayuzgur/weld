@@ -56,7 +56,7 @@ impl RestService {
             response: Response)
             -> BoxFuture<Response, hyper::Error> {
         req.body()
-            .concat()
+            .concat2()
             .and_then(move |body| {
                 let mut db = weld::DATABASE.lock().unwrap();
                 // TODO: Handle bad data
@@ -90,7 +90,7 @@ impl RestService {
            response: Response)
            -> BoxFuture<Response, hyper::Error> {
         req.body()
-            .concat()
+            .concat2()
             .and_then(move |body| {
                 let mut db = weld::DATABASE.lock().unwrap();
                 let payload: Value = from_slice(body.to_vec().as_slice()).unwrap();
