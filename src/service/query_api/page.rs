@@ -2,11 +2,11 @@
 //! All paging related codes contained under this module.
 use service::query_api::query::Query;
 /// An enum to hold sort parameters with the direction.
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Page {
     /// Ascending sorting.
     OFFSET(u8),
-    /// Descendinf sorting.
+    /// Descending sorting.
     LIMIT(u8),
 }
 
@@ -57,14 +57,22 @@ mod tests {
         assert_eq!(parse(Query::new("Abc", "=", "123")), None);
         assert_eq!(parse(Query::new("_offset", "=", "")), None);
         assert_eq!(parse(Query::new("_limit", "=", "")), None);
-        assert_eq!(parse(Query::new("_offset", "=", "123")),
-                   Some(Page::OFFSET(123)));
-        assert_eq!(parse(Query::new("_limit", "=", "123")),
-                   Some(Page::LIMIT(123)));
-        
-        assert_ne!(parse(Query::new("_offset", "=", "123")),
-                   Some(Page::LIMIT(123)));
-        assert_ne!(parse(Query::new("_offset", "=", "123")),
-                   Some(Page::LIMIT(123)));
+        assert_eq!(
+            parse(Query::new("_offset", "=", "123")),
+            Some(Page::OFFSET(123))
+        );
+        assert_eq!(
+            parse(Query::new("_limit", "=", "123")),
+            Some(Page::LIMIT(123))
+        );
+
+        assert_ne!(
+            parse(Query::new("_offset", "=", "123")),
+            Some(Page::LIMIT(123))
+        );
+        assert_ne!(
+            parse(Query::new("_offset", "=", "123")),
+            Some(Page::LIMIT(123))
+        );
     }
 }

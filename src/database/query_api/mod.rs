@@ -4,6 +4,8 @@ pub mod filter;
 pub mod q;
 pub mod sort;
 pub mod fields;
+pub mod paginate;
+
 // TODO:
 // Get the result
 // If it is List than do the ops

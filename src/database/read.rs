@@ -9,19 +9,20 @@ use database::query_api;
 impl Database {
     /// Retuns the list of the tables (outmost keys) from the database.
     pub fn tables(&self) -> Vec<&String> {
-        let map: &serde_json::Map<String, Value> = self.data
-            .as_object()
-            .expect("Database is invalid. You can't mock API with it. Terminating...");
+        let map: &serde_json::Map<String, Value> = self.data.as_object().expect(
+            "Database is invalid. You can't mock API with it. Terminating...",
+        );
         let mut keys = Vec::new();
         keys.extend(map.keys());
         keys
     }
 
     /// Reads the desired result with the given path.
-    pub fn read(&mut self,
-                keys: &mut Vec<String>,
-                queries: Option<Queries>)
-                -> Result<Value, Errors> {
+    pub fn read(
+        &mut self,
+        keys: &mut Vec<String>,
+        queries: Option<Queries>,
+    ) -> Result<Value, Errors> {
         let mut data = &mut self.data;
         match Self::get_object(keys, data) {
             Ok(obj) => {
@@ -32,6 +33,7 @@ impl Database {
                     query_api::q::apply(clone, &q);
                     query_api::sort::apply(clone, &q);
                     query_api::fields::apply(clone, &q);
+                    query_api::paginate::apply(clone, &q);
                     return Ok(clone.clone());
                 }
                 return Ok(obj.clone());

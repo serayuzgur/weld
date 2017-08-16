@@ -6,6 +6,7 @@ mod page;
 
 pub use self::query::Query;
 pub use self::sort::Sort;
+pub use self::page::Page;
 
 /// parse query params. For duplicate parameters only last one will be used.
 pub fn parse(query: Option<&str>) -> Option<Queries> {
@@ -26,12 +27,14 @@ pub fn parse(query: Option<&str>) -> Option<Queries> {
                 let value = parts.get(1).unwrap().to_string();
                 if key.starts_with("_") {
                     // fields,offset,limit,sort,filter,q
-                    set_where_it_belongs(&mut queries,
-                                         Query {
-                                             key: key,
-                                             value: value,
-                                             op: "=".to_string(),
-                                         });
+                    set_where_it_belongs(
+                        &mut queries,
+                        Query {
+                            key: key,
+                            value: value,
+                            op: "=".to_string(),
+                        },
+                    );
                 }
             }
             Some(queries)
@@ -44,7 +47,12 @@ fn set_where_it_belongs(queries: &mut Queries, q: Query) {
     match q.key.as_str() {
         "_fields" => {
             let mut fields_vec = &mut queries.fields;
-            fields_vec.extend(q.value.split(",").map(String::from).collect::<Vec<String>>());
+            fields_vec.extend(
+                q.value
+                    .split(",")
+                    .map(String::from)
+                    .collect::<Vec<String>>(),
+            );
         }
         "_offset" | "_limit" => {
             if let Some(page) = page::parse(q) {
@@ -75,7 +83,7 @@ fn set_where_it_belongs(queries: &mut Queries, q: Query) {
 }
 
 /// A simple struct to hold query parameters well structured.
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct Queries {
     /// field names to return
     pub fields: Vec<String>,
@@ -109,8 +117,8 @@ impl PartialEq for Queries {
     #[inline]
     fn eq(&self, other: &Queries) -> bool {
         self.fields == other.fields && self.filter == other.filter && self.q == other.q &&
-        self.paginate == other.paginate && self.slice == other.slice &&
-        self.sort == other.sort
+            self.paginate == other.paginate && self.slice == other.slice &&
+            self.sort == other.sort
     }
 }
 
