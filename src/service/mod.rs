@@ -31,10 +31,11 @@ impl RestService {
     /// To reach service Http Method must be GET.
     /// It works in acceptor thread. Since it is fast for small databases it is ok to work like this.
     /// Later all services must be handled under a new thread.
-    fn get(paths: Vec<String>,
-           queries: Option<Queries>,
-           response: Response)
-           -> BoxFuture<Response, hyper::Error> {
+    fn get(
+        paths: Vec<String>,
+        queries: Option<Queries>,
+        response: Response,
+    ) -> BoxFuture<Response, hyper::Error> {
         let mut db = weld::DATABASE.lock().unwrap();
         match db.read(&mut paths.clone(), queries) {
             Ok(record) => return utils::success(response, StatusCode::Ok, &record),
@@ -51,30 +52,40 @@ impl RestService {
     /// To reach service Http Method must be POST.
     /// It reads request in acceptor thread. Does all other operations at a differend thread.
     #[inline]
-    fn post(req: Request,
-            paths: Vec<String>,
-            response: Response)
-            -> BoxFuture<Response, hyper::Error> {
+    fn post(
+        req: Request,
+        paths: Vec<String>,
+        response: Response,
+    ) -> BoxFuture<Response, hyper::Error> {
         req.body()
             .concat2()
             .and_then(move |body| {
                 let mut db = weld::DATABASE.lock().unwrap();
-                // TODO: Handle bad data
-                let payload: Value = from_slice(body.to_vec().as_slice()).unwrap();
-                match db.insert(&mut paths.clone(), payload) {
-                    Ok(record) => {
-                        db.flush();
-                        utils::success(response, StatusCode::Created, &record)
-                    }
-                    Err(error) => {
-                        match error {
-                            NotFound(msg) => {
-                                utils::error(response, StatusCode::NotFound, msg.as_str())
+                match from_slice(body.to_vec().as_slice()) {
+                    Ok(payload) => {
+                        match db.insert(&mut paths.clone(), payload) {
+                            Ok(record) => {
+                                db.flush();
+                                utils::success(response, StatusCode::Created, &record)
                             }
-                            Conflict(msg) => {
-                                utils::error(response, StatusCode::Conflict, msg.as_str())
+                            Err(error) => {
+                                match error {
+                                    NotFound(msg) => {
+                                        utils::error(response, StatusCode::NotFound, msg.as_str())
+                                    }
+                                    Conflict(msg) => {
+                                        utils::error(response, StatusCode::Conflict, msg.as_str())
+                                    }
+                                }
                             }
                         }
+                    }
+                    Err(_) => {
+                        utils::error(
+                            response,
+                            StatusCode::BadRequest,
+                            "Request body must be a valid json.",
+                        )
                     }
                 }
             })
@@ -85,26 +96,41 @@ impl RestService {
     /// To reach service Http Method must be PUT.
     /// It reads request in acceptor thread. Does all other operations at a differend thread.
     #[inline]
-    fn put(req: Request,
-           paths: Vec<String>,
-           response: Response)
-           -> BoxFuture<Response, hyper::Error> {
+    fn put(
+        req: Request,
+        paths: Vec<String>,
+        response: Response,
+    ) -> BoxFuture<Response, hyper::Error> {
         req.body()
             .concat2()
             .and_then(move |body| {
                 let mut db = weld::DATABASE.lock().unwrap();
-                let payload: Value = from_slice(body.to_vec().as_slice()).unwrap();
-                match db.update(&mut paths.clone(), payload) {
-                    Ok(record) => {
-                        db.flush();
-                        return utils::success(response, StatusCode::Ok, &record);
-                    }
-                    Err(error) => {
-                        if let NotFound(msg) = error {
-                            utils::error(response, StatusCode::NotFound, msg.as_str())
-                        } else {
-                            utils::error(response, StatusCode::InternalServerError, "Server Error")
+                match from_slice(body.to_vec().as_slice()) {
+                    Ok(payload) => {
+                        match db.update(&mut paths.clone(), payload) {
+                            Ok(record) => {
+                                db.flush();
+                                return utils::success(response, StatusCode::Ok, &record);
+                            }
+                            Err(error) => {
+                                if let NotFound(msg) = error {
+                                    utils::error(response, StatusCode::NotFound, msg.as_str())
+                                } else {
+                                    utils::error(
+                                        response,
+                                        StatusCode::InternalServerError,
+                                        "Server Error",
+                                    )
+                                }
+                            }
                         }
+                    }
+                    Err(_) => {
+                        utils::error(
+                            response,
+                            StatusCode::BadRequest,
+                            "Request body must be a valid json.",
+                        )
                     }
                 }
             })
