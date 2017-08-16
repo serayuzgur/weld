@@ -1,11 +1,11 @@
-//! # fields
-//! All necessery functions for appliying fields to json results.
+//! # paginate
+//! All necessery functions for appliying pagination to json results.
 use serde_json::Value;
 use service::query_api::Queries;
 use service::query_api::Page;
 use std::vec::Vec;
 
-/// let only named fields  array according to the query api
+/// let only records within the given limits return.
 pub fn apply(obj: &mut Value, queries: &Queries) {
     let ref _offset = queries.paginate.0;
     let ref _limit = queries.paginate.1;
