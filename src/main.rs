@@ -30,7 +30,8 @@ use server::Server;
 use std::env::args;
 
 fn main() {
-    info!(weld::ROOT_LOGGER, "Application started";"started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
+    info!(weld::ROOT_LOGGER, "Application started";
+    "started_at" => format!("{}", time::now().rfc3339()), "version" => env!("CARGO_PKG_VERSION"));
 
     load_config();
 

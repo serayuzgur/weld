@@ -47,7 +47,7 @@ impl Configuration {
                 }
                 let config: Configuration = serde_json::from_str(&contents)
                     .expect("Configuration - Error Invalid JSON format. Terminating...");
-                info!(weld::ROOT_LOGGER, "Configutation - Ok");
+                info!(weld::ROOT_LOGGER, "Configuration - Ok");
                 debug!(weld::ROOT_LOGGER, "{:?}", &config);
                 self.server = config.server;
                 self.database = config.database;
