@@ -1,6 +1,7 @@
 # Weld
 Full fake REST API generator.
 
+[![weldmock' current version badge](https://img.shields.io/crates/v/weldmock.svg)](https://crates.io/crates/weldmock)
 [![Build Status](https://travis-ci.org/serayuzgur/weld.svg?branch=master)](https://travis-ci.org/serayuzgur/weld)
 [![codecov](https://codecov.io/gh/serayuzgur/weld/branch/master/graph/badge.svg)](https://codecov.io/gh/serayuzgur/weld)
 
