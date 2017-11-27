@@ -1,6 +1,6 @@
 [root]
-name = "weld"
-version = "0.0.1-alpha.2"
+name = "weldmock"
+version = "0.0.1-alpha.3"
 dependencies = [
  "bytes 0.4.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.17 (registry+https://github.com/rust-lang/crates.io-index)",
