@@ -12,7 +12,7 @@ pub fn apply(obj: &mut Value, queries: &Queries) {
             while i < size {
                 let mut valid = false;
                 if let Some(item) = arr.get(i) {
-                    /// get item field list
+                    // get item field list
                     match item {
                         &Value::Object(ref map) => {
                             for key in map.keys() {

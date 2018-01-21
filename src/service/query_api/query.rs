@@ -42,7 +42,7 @@ impl<'a> From<&'a str> for Query {
 
 /// Parses parameter to a Sort enum
 pub fn parse<S: Into<String>>(param: S) -> Option<Query> {
-    /// add all ops =,!=,<,<=,>,>=,~=,|=
+    // add all ops =,!=,<,<=,>,>=,~=,|=
     let mut param_s = param.into();
 
     let indexes = find_indexes(param_s.clone());

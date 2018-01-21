@@ -12,7 +12,7 @@ use hyper;
 
 use futures::{Stream, Future, BoxFuture};
 use futures_cpupool::CpuPool;
-use serde_json::{from_slice, Value, to_value};
+use serde_json::{from_slice, to_value};
 use database::errors::Errors::{NotFound, Conflict};
 
 use self::query_api::Queries;
