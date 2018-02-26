@@ -5,7 +5,7 @@ use hyper::StatusCode;
 use hyper::server::Response;
 use hyper;
 use hyper::header::AccessControlAllowOrigin;
-use futures::{BoxFuture, Future};
+use futures::future::FutureResult;
 use futures::future::ok;
 use hyper::header::ContentType;
 use serde_json;
@@ -15,14 +15,14 @@ pub fn error(
     response: Response,
     code: StatusCode,
     message: &str,
-) -> BoxFuture<Response, hyper::Error> {
+) -> FutureResult<Response, hyper::Error> {
     ok(
         response
             .with_header(AccessControlAllowOrigin::Any)
             .with_header(ContentType::plaintext())
             .with_status(code)
             .with_body(message.to_string()),
-    ).boxed()
+    )
 }
 
 /// Prepares an success response, wraps to BoxFuture.
@@ -30,14 +30,14 @@ pub fn success(
     response: Response,
     code: StatusCode,
     value: &serde_json::Value,
-) -> BoxFuture<Response, hyper::Error> {
+) -> FutureResult<Response, hyper::Error> {
     ok(
         response
             .with_header(AccessControlAllowOrigin::Any)
             .with_header(ContentType::json())
             .with_status(code)
             .with_body(serde_json::to_vec(&value).unwrap()),
-    ).boxed()
+    )
 }
 
 /// Splits '/'  and filters empty strings

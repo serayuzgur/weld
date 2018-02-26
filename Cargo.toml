@@ -1,6 +1,6 @@
 [package]
 name = "weldmock"
-version = "0.0.1-alpha.3"
+version = "0.0.1-alpha.4"
 license = "MIT/Apache-2.0"
 authors = ["serayuzgur <serayuzgur@gmail.com>"]
 description   = "Full fake REST API generator."
@@ -17,20 +17,20 @@ exclude       = [
 
 [dependencies]
 # Serde for JSON
-serde="1.0.21"
-serde_derive="1.0.21"
-serde_json="1.0.6"
+serde="1.0.27"
+serde_derive="1.0.27"
+serde_json="1.0.9"
 
-bytes = "0.4.5"
-futures = "0.1.17"
-hyper = "0.11.7"
-futures-cpupool = "0.1.7"
-rand = "0.3.18"
+bytes = "0.4.6"
+futures = "0.1.18"
+hyper = "0.11.19"
+futures-cpupool = "0.1.8"
+rand = "0.4.2"
 
 # Logger
-slog= "2.0.12"
+slog= "2.1.1"
 slog-term= "2.3.0"
-slog-async= "2.1.0"
+slog-async= "2.2.0"
 
-time="0.1.38"
-lazy_static="0.2.11"
+time="0.1.39"
+lazy_static="1.0.0"

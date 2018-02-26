@@ -10,8 +10,8 @@ use rand;
 impl Database {
     /// Inserts the record to the given path.
     pub fn insert(&mut self, keys: &mut Vec<String>, value: Value) -> Result<Value, Errors> {
-        let mut data = &mut self.data;
-        if let Ok(mut obj) = Self::get_object(keys, data) {
+        let data = &mut self.data;
+        if let Ok(obj) = Self::get_object(keys, data) {
             // Path Found. It should be an array to accomplish an operation. Otherwise it must be an update not insert.
             if let Some(ref mut array) = obj.as_array_mut() {
                 let mut id = rand::random();

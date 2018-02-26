@@ -41,7 +41,7 @@ fn convert_2_same_type(field_value: &Value, query_value: &str) -> Result<Value, 
         &Value::Number(_) => return serde_json::to_value(i64::from_str_radix(query_value, 10).ok()),
         &Value::String(_) => return serde_json::to_value(query_value),
         _ => {
-            let error = Message("Filter is not applicable for this column".to_string());
+            let error = Message(Box::from("Filter is not applicable for this column"));
             Err(Error::syntax(error, 1, 1))
         }
     }

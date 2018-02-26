@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+#### 0.0.1-alpha.4
+* Dependencies updated.
+* All warnings cleared. There are no deprecated usages now.
+
 #### 0.0.1-alpha.3
 * Dependencies updated.
 * Renamed because of crates.io (weld -> weldmock)

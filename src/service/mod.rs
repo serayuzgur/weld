@@ -10,7 +10,8 @@ use hyper::{Get, Post, Put, Delete, StatusCode};
 use hyper::server::{Service, Request, Response};
 use hyper;
 
-use futures::{Stream, Future, BoxFuture};
+use futures::{Stream, Future};
+use futures::future::FutureResult;
 use futures_cpupool::CpuPool;
 use serde_json::{from_slice, to_value};
 use database::errors::Errors::{NotFound, Conflict};
@@ -35,7 +36,7 @@ impl RestService {
         paths: Vec<String>,
         queries: Option<Queries>,
         response: Response,
-    ) -> BoxFuture<Response, hyper::Error> {
+    ) -> FutureResult<Response, hyper::Error> {
         let mut db = weld::DATABASE.lock().unwrap();
         match db.read(&mut paths.clone(), queries) {
             Ok(record) => return utils::success(response, StatusCode::Ok, &record),
@@ -56,8 +57,8 @@ impl RestService {
         req: Request,
         paths: Vec<String>,
         response: Response,
-    ) -> BoxFuture<Response, hyper::Error> {
-        req.body()
+    ) -> FutureResult<Response, hyper::Error> {
+        FutureResult::from(req.body()
             .concat2()
             .and_then(move |body| {
                 let mut db = weld::DATABASE.lock().unwrap();
@@ -88,8 +89,7 @@ impl RestService {
                         )
                     }
                 }
-            })
-            .boxed()
+            }).wait())
     }
 
     /// Updates the resource at the desired path and returns.
@@ -100,8 +100,8 @@ impl RestService {
         req: Request,
         paths: Vec<String>,
         response: Response,
-    ) -> BoxFuture<Response, hyper::Error> {
-        req.body()
+    ) -> FutureResult<Response, hyper::Error> {
+        FutureResult::from(req.body()
             .concat2()
             .and_then(move |body| {
                 let mut db = weld::DATABASE.lock().unwrap();
@@ -133,15 +133,14 @@ impl RestService {
                         )
                     }
                 }
-            })
-            .boxed()
+            }).wait())
     }
 
     /// Deletes the resource at the desired path and returns.
     /// To reach service Http Method must be DELETE.
     /// It reads request in acceptor thread. Does all other operations at a differend thread.
     #[inline]
-    fn delete(paths: Vec<String>, response: Response) -> BoxFuture<Response, hyper::Error> {
+    fn delete(paths: Vec<String>, response: Response) -> FutureResult<Response, hyper::Error> {
         let mut db = weld::DATABASE.lock().unwrap();
         match db.delete(&mut paths.clone()) {
             Ok(record) => {
@@ -168,7 +167,7 @@ impl Service for RestService {
     /// Type of the error
     type Error = hyper::Error;
     /// Type of the future
-    type Future = BoxFuture<Response, hyper::Error>;
+    type Future = FutureResult<Response, hyper::Error>;
 
     /// Entry point of the service. Pases path nad method and redirect to the correct function.
     fn call(&self, req: Request) -> Self::Future {

@@ -23,7 +23,7 @@ impl Database {
         keys: &mut Vec<String>,
         queries: Option<Queries>,
     ) -> Result<Value, Errors> {
-        let mut data = &mut self.data;
+        let data = &mut self.data;
         match Self::get_object(keys, data) {
             Ok(obj) => {
                 println!("{:?}", queries);
