@@ -22,7 +22,6 @@ use serde_json::Value;
 use serde_json::Value::{Array, Object};
 use self::errors::Errors;
 
-
 /// This is a very  simple database struct for a json db.
 /// It works really simple. Loads all data to memory.
 /// Does all the operations in the memory and writes the final object to the file at the end.
@@ -33,7 +32,6 @@ pub struct Database {
     configuration: Option<configuration::Database>,
     data: serde_json::Value,
 }
-
 
 impl Database {
     /// Creates an instance of the Database.
@@ -61,15 +59,16 @@ impl Database {
         match file.read_to_string(&mut contents) {
             Ok(usize) => {
                 if usize == 0 {
-                    panic!("Database - Error It is empty. You can't mock API with it. \
-                            Terminating...");
+                    panic!(
+                        "Database - Error It is empty. You can't mock API with it. \
+                         Terminating..."
+                    );
                 }
             }
-            Err(e) => {
-                panic!("Database - Error You can't mock API with it. Terminating...{}",
-                       e)
-            }
-
+            Err(e) => panic!(
+                "Database - Error You can't mock API with it. Terminating...{}",
+                e
+            ),
         }
         let new_data: serde_json::Value = serde_json::from_str(&contents)
             .expect("Invalid JSON format. Check provided db. Terminating...");
@@ -88,9 +87,10 @@ impl Database {
     /// This is the main access function to reach the desired data from the whole database.
     /// Tries to find the keys provided in the database recursively.
     /// Returns mutable references to allow manipulation.
-    pub fn get_object<'per_req>(keys: &mut Vec<String>,
-                                json_object: &'per_req mut Value)
-                                -> Result<&'per_req mut Value, Errors> {
+    pub fn get_object<'per_req>(
+        keys: &mut Vec<String>,
+        json_object: &'per_req mut Value,
+    ) -> Result<&'per_req mut Value, Errors> {
         if keys.len() == 0 {
             return Ok(json_object);
         }
@@ -132,29 +132,23 @@ impl Database {
             .open(&self.configuration.clone().unwrap().path)
             .unwrap();
         match file.set_len(0) {
-            Ok(_) => {
-                match file.write_all(bytes) {
-                    Ok(_) => {
-                        let result = file.sync_all();
-                        info!(&self.logger,
-                              "Flush - Ok File {:?} Result: {:?}",
-                              &file,
-                              &result);
-                    }
-                    Err(e) => {
-                        error!(&self.logger,
-                               "Flush - Error Can't write file File: {:?} Error: {:?}",
-                               &file,
-                               e)
-                    }
+            Ok(_) => match file.write_all(bytes) {
+                Ok(_) => {
+                    let result = file.sync_all();
+                    info!(
+                        &self.logger,
+                        "Flush - Ok File {:?} Result: {:?}", &file, &result
+                    );
                 }
-            }
-            Err(e) => {
-                error!(&self.logger,
-                       "Flush - Error Can't set file size File: {:?} Error {:?}",
-                       &file,
-                       e)
-            }
+                Err(e) => error!(
+                    &self.logger,
+                    "Flush - Error Can't write file File: {:?} Error: {:?}", &file, e
+                ),
+            },
+            Err(e) => error!(
+                &self.logger,
+                "Flush - Error Can't set file size File: {:?} Error {:?}", &file, e
+            ),
         }
     }
 
@@ -163,10 +157,7 @@ impl Database {
         let mut index = 0;
         for value in vec.iter() {
             let map = value.as_object().unwrap();
-            let id = map.get("id")
-                .unwrap()
-                .as_i64()
-                .unwrap();
+            let id = map.get("id").unwrap().as_i64().unwrap();
             if id.eq(target) {
                 return Some(index);
             }

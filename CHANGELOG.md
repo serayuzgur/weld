@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+#### 0.0.1-alpha.5
+* FutureResult usage removed. Now Box<Future<Item = Response, Error = Error>> is in use.
+* Blocking post and put bug fixed.
 #### 0.0.1-alpha.4
 * Dependencies updated.
 * All warnings cleared. There are no deprecated usages now.

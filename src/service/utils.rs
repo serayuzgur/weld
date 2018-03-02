@@ -3,26 +3,27 @@
 
 use hyper::StatusCode;
 use hyper::server::Response;
-use hyper;
+use hyper::Error;
 use hyper::header::AccessControlAllowOrigin;
-use futures::future::FutureResult;
+use futures;
 use futures::future::ok;
 use hyper::header::ContentType;
 use serde_json;
+
+type FutureBox = Box<futures::Future<Item = Response, Error = Error>>;
+
 
 /// Prepares an error response , logs it, wraps to BoxFuture.
 pub fn error(
     response: Response,
     code: StatusCode,
     message: &str,
-) -> FutureResult<Response, hyper::Error> {
-    ok(
-        response
-            .with_header(AccessControlAllowOrigin::Any)
-            .with_header(ContentType::plaintext())
-            .with_status(code)
-            .with_body(message.to_string()),
-    )
+) -> FutureBox {
+    Box::new(ok(response
+        .with_header(AccessControlAllowOrigin::Any)
+        .with_header(ContentType::plaintext())
+        .with_status(code)
+        .with_body(message.to_string())))
 }
 
 /// Prepares an success response, wraps to BoxFuture.
@@ -30,14 +31,12 @@ pub fn success(
     response: Response,
     code: StatusCode,
     value: &serde_json::Value,
-) -> FutureResult<Response, hyper::Error> {
-    ok(
-        response
-            .with_header(AccessControlAllowOrigin::Any)
-            .with_header(ContentType::json())
-            .with_status(code)
-            .with_body(serde_json::to_vec(&value).unwrap()),
-    )
+) -> FutureBox {
+    Box::new(ok(response
+        .with_header(AccessControlAllowOrigin::Any)
+        .with_header(ContentType::json())
+        .with_status(code)
+        .with_body(serde_json::to_vec(&value).unwrap())))
 }
 
 /// Splits '/'  and filters empty strings
