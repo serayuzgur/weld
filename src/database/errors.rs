@@ -9,7 +9,7 @@ use serde_json::Value;
 pub enum Errors {
     /// Record not found
     NotFound(String),
-    /// Record conflicts wit another record.
+    /// Record conflicts with another record.
     Conflict(String),
 }
 

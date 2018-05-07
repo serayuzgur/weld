@@ -35,9 +35,9 @@ impl<'a> Server<'a> {
         Http::new()
             .bind(&endpoint, move || {
                 Ok(service::RestService {
-                       logger: weld::ROOT_LOGGER.new(o!()),
-                       thread_pool: thread_pool.clone(),
-                   })
+                    logger: weld::ROOT_LOGGER.new(o!()),
+                    thread_pool: thread_pool.clone(),
+                })
             })
             .unwrap()
             .run()
