@@ -46,7 +46,7 @@ fn set_where_it_belongs(queries: &mut Queries, q: Query) {
 
     match q.key.as_str() {
         "_fields" => {
-            let mut fields_vec = &mut queries.fields;
+            let fields_vec = &mut queries.fields;
             fields_vec.extend(
                 q.value
                     .split(",")
@@ -65,11 +65,11 @@ fn set_where_it_belongs(queries: &mut Queries, q: Query) {
             }
         }
         "_sort" => {
-            let mut sort_vet = &mut queries.sort;
+            let sort_vet = &mut queries.sort;
             sort_vet.extend(q.value.split(",").map(Sort::from).collect::<Vec<Sort>>());
         }
         "_filter" => {
-            let mut filter_vet = &mut queries.filter;
+            let filter_vet = &mut queries.filter;
             println!("parsing {}", q.value);
             filter_vet.extend(q.value.split(",").map(Query::from).collect::<Vec<Query>>());
         }

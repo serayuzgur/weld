@@ -9,7 +9,7 @@ use configuration::Configuration;
 use database::Database;
 use std::sync::Mutex;
 
-///Initializes lazy statics.
+//Initializes lazy statics.
 lazy_static! {
     /// Root logger for the application. Helps to manage log output from one place. All loggers will use this.
     pub static ref ROOT_LOGGER: Logger = Logger::root(Arc::new(Async::new(CompactFormat::new(TermDecorator::new().build()).build().fuse()).build().fuse()), o!());
