@@ -10,7 +10,7 @@ use futures::future::ok;
 use hyper::header::ContentType;
 use serde_json;
 
-type FutureBox = Box<futures::Future<Item = Response, Error = Error>>;
+type FutureBox = Box<dyn futures::Future<Item = Response, Error = Error>>;
 
 
 /// Prepares an error response , logs it, wraps to BoxFuture.

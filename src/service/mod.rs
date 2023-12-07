@@ -1,23 +1,23 @@
 //! # service
 //! This is the service layer of the application.
 //! All requests taken by the server will be consumed by the services under this module.
-pub mod utils;
 pub mod query_api;
+pub mod utils;
 
-use weld;
-use slog;
-use hyper::{Delete, Error, Get, Post, Put, StatusCode};
-use hyper::server::{Request, Response, Service};
 use hyper;
+use hyper::server::{Request, Response, Service};
+use hyper::{Delete, Error, Get, Post, Put, StatusCode};
+use slog;
+use weld;
 
+use database::errors::Errors::{Conflict, NotFound};
 use futures::{Future, Stream};
 use futures_cpupool::CpuPool;
 use serde_json::{from_slice, to_value};
-use database::errors::Errors::{Conflict, NotFound};
 
 use self::query_api::Queries;
 
-type FutureBox = Box<Future<Item = Response, Error = Error>>;
+type FutureBox = Box<dyn Future<Item = Response, Error = Error>>;
 
 /// A Simple struct to represent rest service.
 pub struct RestService {
